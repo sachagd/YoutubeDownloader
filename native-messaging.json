@@ -1,0 +1,7 @@
+{
+  "name": "com.sacha.youtubedownloader",
+  "description": "Handles video downloading and conversion tasks for the YouTube Downloader extension",
+  "path": "main.bat",
+  "type": "stdio",
+  "allowed_extensions": ["ca1e723b4a4191caccf4f9366534c6628e0c70a6@temporary-addon"]
+}
