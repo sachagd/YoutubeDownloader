@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "YouTube Audio Downloader",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Download YouTube video audio directly via Firefox.",
     "icons": {
         "48": "icon.png"
@@ -9,7 +9,8 @@
     "permissions": [
         "activeTab",
         "downloads",
-        "nativeMessaging"
+        "nativeMessaging",
+        "storage"
     ],
     "background": {
         "scripts": ["background.js"]
@@ -17,6 +18,10 @@
     "browser_action": {
         "default_icon": "icon.png",
         "default_title": "Download Audio"
+    },
+    "options_ui": {
+        "page": "settings.html",
+        "chrome_style": true
     },
     "content_scripts": [
         {
