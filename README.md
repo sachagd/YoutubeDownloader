@@ -22,7 +22,8 @@ To access the parameters of the extension :
 
 Extra-informations : 
   - By default, the files are saved in the extension directory, in a folder named "output"
-  - By default, the startTime and endTime boxes are empty, which mean that the youtube video will be downloaded in its entirety
+  - By default, the Start Time and End Time boxes are empty, which mean that the youtube video will be downloaded in its entirety
+  - Start Time and End Time format is HH\:MM:SS but things like 1:15 or 10 are correctly understood as 1 minutes 15 seconds and 10 seconds
 
 Error you might encounter that aren't my fault : 
 
