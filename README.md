@@ -15,7 +15,14 @@ Until i submit the extension to firefox there are some steps to follow in order 
   - Copy Extension Id
   - Paste it in native-messaging.json in "allowed_extensions"
 
-To access the parameters of the extension, open a new firefox tab, tap "about:addons", click on the extension and finally on options
+To access the parameters of the extension :
+  - Open a new firefox tab and tap "about:addons"
+  - Click on the extension
+  - Click on options
+
+Extra-informations : 
+  - By default, the files are saved in the extension directory, in a folder named "output"
+  - By default, the startTime and endTime boxes are empty, which mean that the youtube video will be downloaded in its entirety
 
 Error you might encounter that aren't my fault : 
 
