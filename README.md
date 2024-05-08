@@ -1,34 +1,50 @@
-YoutubeDownloader is a firefox extension that allows anybody to donwload youtube video in any chosen format
+# YouTubeDownloader
 
-i need to test the code but i also need to sleep
+**YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos in mp3 or mp4 files. It also allows you to select specific part of a video and also choose a resolution for mp4 files. 
 
-Before utilising it you need to download a few dependencies. To do that, execute init.bat in administrator mode.
-List of things done by init.bat : 
-  - Installing pip if it's not already the case
-  - Installing python libraries : Tkinter, Beautifulsoup, requests and pytube
-  - Installing ffmpeg if it's not already the case and adding the file path to the PATH environment variable
-  - Adding a registery key
+## Prerequisites
+Before using the extension, you must download a few dependencies : 
 
-Until i submit the extension to firefox there are some steps to follow in order to use it : 
-  - Open a new firefox tab and tap "about:debugging"
-  - Go to "This firefox" at the left of the tab
-  - Click on “Load Temporary Add-on...”
-  - Select manifest.json
-  - Copy Extension Id
-  - Paste it in native-messaging.json in "allowed_extensions"
+**Execute `init.bat` in Administrator mode:**
+   - Installs `pip` if it's not already installed.
+   - Installs Python libraries: `Tkinter`, `BeautifulSoup`, `requests`, and `pytube`.
+   - Installs `ffmpeg` if it's not already installed and adds the file path to the `PATH` environment variable.
+   - Adds a registry key.
 
-To access the parameters of the extension :
-  - Open a new firefox tab and tap "about:addons"
-  - Click on the extension
-  - Click on options
+## Installation Steps
+To install the extension in Firefox, follow these steps:
 
-Extra-informations : 
-  - By default, the files are saved in the extension directory, in a folder named "output"
-  - By default, the Start Time and End Time boxes are empty, which mean that the youtube video will be downloaded in its entirety
-  - Start Time and End Time format is HH\:MM:SS but things like 1:15 or 10 are correctly understood as 1 minutes 15 seconds and 10 seconds
+1. Open a new Firefox tab and enter `about:debugging`.
+2. Navigate to **This Firefox** on the left side of the tab.
+3. Click on **Load Temporary Add-on...**.
+4. Select `manifest.json`.
+5. Copy the Extension ID.
+6. Paste it in `native-messaging.json` in `"allowed_extensions"`.
 
-Error you might encounter that aren't my fault : 
+## Accessing Extension Settings
+To modify the settings of the extension:
 
-\_\_init\_\_: could not find match for ^\w+\W -> in the file cypher.py of the pytube module, replace the line 30 "var_regex = re.compile(r"^\w+\W")" by "var_regex = re.compile(r"^\$*\w+\W")"
+1. Open a new Firefox tab and enter `about:addons`.
+2. Click on the extension.
+3. Click on **Options**.
 
-source : https://stackoverflow.com/questions/70776558/pytube-exceptions-regexmatcherror-init-could-not-find-match-for-w-w
+## Additional Information
+- By default, files are saved in the extension directory, in a folder named `output`.
+- The **Start Time** and **End Time** boxes are empty by default, meaning the entire YouTube video will be downloaded.
+- The format for Start Time and End Time is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
+
+## Common Errors
+
+### \_\_init\_\_: could not find match for ^\w+\W : 
+In the file `cypher.py` of the pytube module, replace line 30
+
+ From:
+```python
+var_regex = re.compile(r"^\w+\W")
+```
+To:
+```python
+var_regex = re.compile(r"^\$*\w+\W")
+```
+
+Source : [Stack Overflow](https://stackoverflow.com/questions/70776558/pytube-exceptions-regexmatcherror-init-could-not-find-match-for-w-w)
