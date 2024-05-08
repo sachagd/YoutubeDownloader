@@ -14,17 +14,17 @@ browser.browserAction.onClicked.addListener((tab) => {
         // Send a message to the content script with the format and path included
         browser.tabs.sendMessage(tab.id, {action: 'download'}).then(response => {
             if (response.url.includes("youtube.com/watch")) {
-                sendMessageToNativeApp(response.url, downloadFormat, downloadPath, downloadResolution, "video", startTime, endTime, filenamePreference);
+                sendMessageToNativeApp(tab, response.url, downloadFormat, downloadPath, downloadResolution, "video", startTime, endTime, filenamePreference);
             }
             if (response.url.includes("youtube.com/playlist")){
-                sendMessageToNativeApp(response.url, downloadFormat, downloadPath, downloadResolution, "playlist", startTime, endTime, filenamePreference);
+                sendMessageToNativeApp(tab, response.url, downloadFormat, downloadPath, downloadResolution, "playlist", startTime, endTime, filenamePreference);
             }
         }).catch(error => console.error(`Error sending message to content script: ${error}`));
     });
 });
 
 // Updated function to send messages to the native application including the path
-function sendMessageToNativeApp(url, format, path, resolution, type, startTime, endTime, filenamePreference) {
+function sendMessageToNativeApp(tab, url, format, path, resolution, type, startTime, endTime, filenamePreference) {
     var message = {action: 'download', url: url, format: format, path: path, resolution: resolution, type: type, startTime: startTime, endTime: endTime, filenamePreference : filenamePreference};
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', message, response => {
         if (browser.runtime.lastError) {
@@ -32,7 +32,7 @@ function sendMessageToNativeApp(url, format, path, resolution, type, startTime, 
         } else {
             console.log('Response from native application:', response);
             if (response.error) {
-                browser.tabs.sendMessage({action: 'resolution_error', availableResolutions : response.availableResolutions, error : response.error});
+                browser.tabs.sendMessage(tab.id, {action: 'resolution_error', availableResolutions : response.availableResolutions, error : response.error});
             }
         }
     })  ;
