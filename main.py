@@ -123,7 +123,7 @@ def main():
                 if data['type'] == 'playlist':
                     download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'])
             else:
-                logging.error("Some data were not received")
+                logging.error("Some data was not received")
         if data['action'] == 'select_folder':
             path = select_folder()
             logging.info(f"Selected folder path: {path}")
