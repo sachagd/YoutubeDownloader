@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "YouTube Audio Downloader",
+    "name": "YouTube Downloader",
     "version": "1.1",
-    "description": "Download YouTube video audio directly via Firefox.",
+    "description": "Download YouTube video in mp3 or mp4 files directly via Firefox.",
     "icons": {
         "48": "icon.png"
     },
@@ -17,7 +17,7 @@
     },
     "browser_action": {
         "default_icon": "icon.png",
-        "default_title": "Download Audio"
+        "default_title": "YouTube Downloader"
     },
     "options_ui": {
         "page": "settings.html",
