@@ -21,34 +21,47 @@ def get_complete_video_title(video_url):
         complete_title = complete_title[:-10]
     return complete_title
 
-def download_video(video_url, output_path, format, resolution, startTime, endTime):
+def download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference):
     """ Downloads the video and converts it to specified format. """
     try:
-        complete_title = get_complete_video_title(video_url).replace('"',"'").replace("|"," ").replace("/"," ").replace(":", " ").replace("\\\\", " ")
+        if filenamePreference:
+            complete_title = get_complete_video_title(video_url)
+            for c in '<>:"/\\|?*':
+                complete_title = complete_title.replace(c," ")
+        else: 
+            complete_title = f"output_{len(os.listdir(path))}"
         yt = YouTube(video_url)
+
         if format == 'mp3':
             stream = yt.streams.filter(only_audio=True,file_extension='mp4').first()
+            filename = f"{complete_title}.mp4"
+            stream.download(output_path=path, filename=filename)
+            input_path = os.path.join(path, filename)
+            subprocess.run(f'ffmpeg -i "{input_path}" -map 0:a:0 -acodec libmp3lame "{os.path.join(path, f"{complete_title}.mp3")}"', shell=True)
+            os.remove(input_path)
         else:
-            stream = yt.streams.filter(res=resolution,file_extension='mp4').first()
-            if not stream:
+            video_stream = yt.streams.filter(res=resolution, file_extension='mp4').first()
+            if not video_stream:
                 available_resolutions = {stream.resolution for stream in yt.streams.filter(file_extension='mp4') if stream.resolution}
                 send_message({
                     'error': f"No streams available at resolution {resolution}",
                     'availableResolutions': list(available_resolutions)
                 })
-        
-        filename = f"{complete_title}.mp4"
-        stream.download(output_path=output_path, filename=filename)
-        
-        if format == 'mp3':
-            input_path = os.path.join(output_path, filename)
-            subprocess.run(f'ffmpeg -i "{input_path}" -map 0:a:0 -acodec libmp3lame "{os.path.join(output_path, f"{complete_title}.mp3")}"', shell=True)
-            os.remove(input_path)
-        
-        if not startTime and not endTime:
-            uncut_file_path = os.path.join(output_path, f"{complete_title}.{format}")
-            temp_file_path = os.path.join(output_path, f"{complete_title}_temp.{format}")
-            ffmpeg_cmd = ['ffmpeg', '-i', uncut_file_path]
+                logging.error(f"No streams available at resolution {resolution}, here is the list of all available resolutions {list(available_resolutions)}")
+                return
+            audio_stream = yt.streams.filter(only_audio=True,file_extension='mp4').first()
+            audio_stream.download(output_path=path, filename="audio.mp4")
+            video_stream.download(output_path=path, filename="video.mp4")
+            audio_path = os.path.join(path, "audio.mp4")
+            video_path = os.path.join(path, "video.mp4")
+            subprocess.run(["ffmpeg", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", os.path.join(path, f'{complete_title}.mp4')], check=True, text=True)
+            os.remove(audio_path)
+            os.remove(video_path)
+
+        if startTime or endTime:
+            uncut_path = os.path.join(path, f"{complete_title}.{format}")
+            temp_path = os.path.join(path, f"{complete_title}_temp.{format}")
+            ffmpeg_cmd = ['ffmpeg', '-i', uncut_path]
 
             if startTime is not None:
                 ffmpeg_cmd += ['-ss', startTime]
@@ -56,19 +69,19 @@ def download_video(video_url, output_path, format, resolution, startTime, endTim
             if endTime is not None:
                 ffmpeg_cmd += ['-to', endTime]
                 
-            ffmpeg_cmd += ['-c', 'copy', temp_file_path]
+            ffmpeg_cmd += ['-c', 'copy', temp_path]
             subprocess.run(ffmpeg_cmd, check=True)
-            os.remove(uncut_file_path)
-            os.rename(temp_file_path,uncut_file_path)
+            os.remove(uncut_path)
+            os.rename(temp_path,uncut_path)
 
-        logging.info(f"File '{filename}' downloaded successfully.")
+        logging.info(f"{complete_title} downloaded successfully.")
     except Exception as e:
         logging.error(f"Failed to download and convert {complete_title}: {e}")
 
-def download_playlist(playlist_url, output_path, format, resolution, startTime, endTime):
+def download_playlist(playlist_url, path, format, resolution, startTime, endTime, filenamePreference):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
-        download_video(video_url, output_path, format, resolution, startTime, endTime)
+        download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference)
 
 def select_folder():
     """Open a folder selection dialog and return the selected path."""
@@ -102,15 +115,15 @@ def main():
     """ Main loop to process incoming messages continuously. """
     while True:
         data = read_message()
-        if data['action'] == 'download': 
-            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data:
-                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']} and type: {data['type']}")
+        if data['action'] == 'download':
+            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'endTime' in data and 'startTime' in data and 'filenamePreference' in data:
+                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, startTime: {data['startTime']}, endTime: {data['endTime']} and filenamePreference: {data['filenamePreference']}")
                 if data['type'] == 'video':
-                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'])
+                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'])
                 if data['type'] == 'playlist':
-                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'])
+                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'])
             else:
-                logging.error("No URL, path, format, resolution or type (video or playlist) received, or incorrect data format")
+                logging.error("Some data were not received")
         if data['action'] == 'select_folder':
             path = select_folder()
             logging.info(f"Selected folder path: {path}")

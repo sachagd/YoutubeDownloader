@@ -10,17 +10,20 @@
     <div class="settings-container">
         <h1>Download Preferences</h1>
         <form id="settings-form">
-            <label>Choose download format:</label>
-            <div>
-                <input type="radio" id="format-mp3" name="format" value="mp3" checked>
-                <label for="format-mp3">MP3 (Audio)</label>
-            </div>
-            <div>
-                <input type="radio" id="format-mp4" name="format" value="mp4">
-                <label for="format-mp4">MP4 (Video)</label>
-            </div>
-            <div>
-                <label for="resolution-select">Select resolution:</label>
+            <fieldset>
+                <legend>Choose download format:</legend>
+                <div>
+                    <input type="radio" id="format-mp3" name="format" value="mp3" checked>
+                    <label for="format-mp3">MP3 (Audio)</label>
+                </div>
+                <div>
+                    <input type="radio" id="format-mp4" name="format" value="mp4">
+                    <label for="format-mp4">MP4 (Video)</label>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Select resolution:</legend>
                 <select id="resolution-select" name="resolution" disabled>
                     <option value="144p">144p</option>
                     <option value="240p">240p</option>
@@ -32,17 +35,32 @@
                     <option value="2160p">4K</option>
                     <option value="4320p">8K</option>
                 </select>
-            </div>
+            </fieldset>
+
             <div>
-                <label for="start-time">Start Time :</label>
+                <label for="start-time">Start Time:</label>
                 <input type="text" id="start-time" name="start-time" placeholder="HH:MM:SS">
             </div>
             <div>
-                <label for="end-time">End Time :</label>
+                <label for="end-time">End Time:</label>
                 <input type="text" id="end-time" name="end-time" placeholder="HH:MM:SS">
+
             </div>
-            <button type="button" id="selectFolderButton">Select Download Folder</button>
-            <p id="selectedFolderPath">No folder selected</p>
+            <fieldset>
+                <legend>Filename preference:</legend>
+                <div>
+                    <input type="radio" id="filename-title" name="filenamePreference" value="title" checked>
+                    <label for="filename-title">Use YouTube Video Title</label>
+                </div>
+                <div>
+                    <input type="radio" id="filename-output" name="filenamePreference" value="output">
+                    <label for="filename-output">Use generic 'output' name</label>
+                </div>
+            </fieldset>
+            <div style="text-align:center">
+                <button type="button" id="selectFolderButton">Select Download Folder</button>
+                <p id="selectedFolderPath">No folder selected</p>
+            </div>
         </form>
     </div>
     <script src="settings.js"></script>

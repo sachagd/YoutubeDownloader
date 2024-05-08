@@ -13,11 +13,13 @@ document.getElementById('selectFolderButton').addEventListener('click', () => {
 
 document.getElementById('start-time').addEventListener('input', () => {
     let startTime = document.getElementById('start-time').value;
+    console.log('start time saved:', startTime)
     browser.storage.local.set({startTime: startTime});
 });
 
 document.getElementById('end-time').addEventListener('input', () => {
     let endTime = document.getElementById('end-time').value;
+    console.log('end time saved:', endTime)
     browser.storage.local.set({endTime: endTime});
 });
 
@@ -40,6 +42,18 @@ document.querySelectorAll('input[name="format"]').forEach(radio => {
         browser.storage.local.set(settingsToSave, () => {
             console.log('Settings saved:', settingsToSave);
         });
+    });
+});
+
+document.querySelectorAll('input[name="filenamePreference"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        if(radio.value === 'title'){
+            browser.storage.local.set({filenamePreference: true}); 
+        }
+        else{
+            browser.storage.local.set({filenamePreference: false});
+        }
+        console.log('Filename preference saved:', radio.value);
     });
 });
 
