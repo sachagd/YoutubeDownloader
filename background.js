@@ -25,8 +25,6 @@ browser.browserAction.onClicked.addListener((tab) => {
 
 // Updated function to send messages to the native application including the path
 function sendMessageToNativeApp(url, format, path, resolution, type, startTime, endTime, filenamePreference) {
-    console.log(filenamePreference)
-    console.log(startTime)
     var message = {action: 'download', url: url, format: format, path: path, resolution: resolution, type: type, startTime: startTime, endTime: endTime, filenamePreference : filenamePreference};
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', message, response => {
         if (browser.runtime.lastError) {
