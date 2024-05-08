@@ -76,7 +76,7 @@ def download_video(video_url, path, format, resolution, startTime, endTime, file
 
         logging.info(f"{complete_title} downloaded successfully.")
     except Exception as e:
-        logging.error(f"Failed to download and convert {complete_title}: {e}")
+        logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
 def download_playlist(playlist_url, path, format, resolution, startTime, endTime, filenamePreference):
     playlist = Playlist(playlist_url)
