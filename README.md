@@ -1,7 +1,5 @@
 # YouTubeDownloader
 
-Currently broken as of July 9 2024 because of some update in youtube code. I'm waiting for a pytube update (15.0.0 is the current one).
-
 **YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos and playlist in mp3 and mp4 format. It also allows you to select specific parts of a video and choose a resolution for mp4 files.
 
 ## Prerequisites
@@ -40,3 +38,9 @@ To modify the settings of the extension:
 - By default, files are saved in the extension directory, in a folder named `output`.
 - The **Start Time** and **End Time** boxes are empty by default, meaning the entire YouTube video will be downloaded.
 - The format for Start Time and End Time is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
+
+## Potential issues
+
+- **RegexMatchError: get_throttling_function_name: could not find match for multiple**  
+  Solution: [Issue #1954 on pytube's GitHub](https://github.com/pytube/pytube/issues/1954)
+
