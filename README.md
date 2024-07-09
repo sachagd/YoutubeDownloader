@@ -1,5 +1,7 @@
 # YouTubeDownloader
 
+Currently broken as of July 9 2024 because of some update in youtube code. I'm waiting for a pytube update (15.0.0 is the current one).
+
 **YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos and playlist in mp3 and mp4 format. It also allows you to select specific parts of a video and choose a resolution for mp4 files.
 
 ## Prerequisites
