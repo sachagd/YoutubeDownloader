@@ -40,7 +40,8 @@ To modify the settings of the extension:
 - The format for Start Time and End Time is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
 
 ## Potential issues
+As Youtube often make changes that can break pytube, try using pytubefix as it is updated more frequently than pytube
+[Github page](https://github.com/JuanBindez/pytubefix)
 
-- **RegexMatchError: get_throttling_function_name: could not find match for multiple**  
-  Solution: [Issue #1954 on pytube's GitHub](https://github.com/pytube/pytube/issues/1954)
+You just need to download it, and change the `import pytube` line in main.py correspondly
 
