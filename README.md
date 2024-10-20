@@ -7,7 +7,7 @@ Before using the extension, you must download a few dependencies:
 
 **Execute `init.bat` in Administrator mode:**
    - Installs `pip` if it's not already installed.
-   - Installs Python libraries: `Tkinter`, `BeautifulSoup`, `requests`, and `pytube`.
+   - Installs Python libraries: `Tkinter`, `BeautifulSoup`, `requests`, and `pytubefix`.
    - Installs `ffmpeg` if it's not already installed and adds the file path to the `PATH` environment variable.
    - Adds a registry key.
 
@@ -38,10 +38,3 @@ To modify the settings of the extension:
 - By default, files are saved in the extension directory, in a folder named `output`.
 - The **Start Time** and **End Time** boxes are empty by default, meaning the entire YouTube video will be downloaded.
 - The format for Start Time and End Time is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
-
-## Potential issues
-As Youtube often make changes that can break pytube, try using pytubefix as it is updated more frequently than pytube
-[Github page](https://github.com/JuanBindez/pytubefix)
-
-You just need to download it, and change the `import pytube` line in main.py correspondly
-
