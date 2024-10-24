@@ -3,10 +3,11 @@ import json
 import logging
 import os
 import subprocess
-from pytube import YouTube, Playlist
+from pytubefix import YouTube, Playlist
 from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
+import win32com.client
 
 # Setup logging
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
@@ -21,7 +22,7 @@ def get_complete_video_title(video_url):
         complete_title = complete_title[:-10]
     return complete_title
 
-def download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference):
+def download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
         if filenamePreference:
@@ -30,19 +31,29 @@ def download_video(video_url, path, format, resolution, startTime, endTime, file
                 complete_title = complete_title.replace(c," ")
         else: 
             complete_title = f"output_{len(os.listdir(path))}"
+        downloaded_video.append(f"{complete_title}.{format}")
         yt = YouTube(video_url)
-
         if format == 'mp3':
-            stream = yt.streams.filter(only_audio=True,file_extension='mp4').first()
-            filename = f"{complete_title}.mp4"
-            stream.download(output_path=path, filename=filename)
-            input_path = os.path.join(path, filename)
-            subprocess.run(f'ffmpeg -i "{input_path}" -map 0:a:0 -acodec libmp3lame "{os.path.join(path, f"{complete_title}.mp3")}"', shell=True)
-            os.remove(input_path)
+            stream = yt.streams.get_audio_only()
+            if iTunesSync:
+                '''
+                Mp3 files downlaoded with pytubefix do not include metadata
+                '''
+                stream.download(output_path=path, filename="audio.mp3")
+                input_path = os.path.join(path, "audio.mp3")
+                subprocess.run(f'ffmpeg -i "{input_path}" -map 0:a:0 -acodec mp3 -write_xing 0 "{os.path.join(path, f"{complete_title}.mp3")}"')
+                os.remove(input_path)
+            else:
+                stream.download(output_path=path, filename=f"{complete_title}.mp3")
         else:
-            video_stream = yt.streams.filter(res=resolution, file_extension='mp4').first()
+            '''
+            From what i've tested, there was no stream with audio and video (ie where progressive = True) for all resolution available and the highest was very low.
+            As a result, i made a little workaround
+            '''
+            video_stream = yt.streams.filter(res=resolution).first()
             if not video_stream:
-                available_resolutions = {stream.resolution for stream in yt.streams.filter(file_extension='mp4') if stream.resolution}
+                available_resolutions = list({stream.resolution for stream in yt.streams.filter(file_extension='mp4') if stream.resolution})
+                available_resolutions.sort()
                 send_message({
                     'error': f"No streams available at resolution {resolution}",
                     'availableResolutions': list(available_resolutions)
@@ -78,10 +89,16 @@ def download_video(video_url, path, format, resolution, startTime, endTime, file
     except Exception as e:
         logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
-def download_playlist(playlist_url, path, format, resolution, startTime, endTime, filenamePreference):
+def download_playlist(playlist_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
-        download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference)
+        download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync)
+
+def iTunesSync(path):
+    iTunes = win32com.client.Dispatch("iTunes.Application")
+    library = iTunes.LibraryPlaylist
+    for filename in downloaded_video:
+        library.AddFile(os.path.join(path, filename))
 
 def select_folder():
     """Open a folder selection dialog and return the selected path."""
@@ -113,21 +130,27 @@ def send_message(response):
 
 def main():
     """ Main loop to process incoming messages continuously. """
+    global downloaded_video
     while True:
         data = read_message()
         if data['action'] == 'download':
-            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'endTime' in data and 'startTime' in data and 'filenamePreference' in data:
-                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, startTime: {data['startTime']}, endTime: {data['endTime']} and filenamePreference: {data['filenamePreference']}")
+            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'endTime' in data and 'startTime' in data and 'filenamePreference' in data and 'iTunesSync' in data:
+                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, startTime: {data['startTime']}, endTime: {data['endTime']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
+                downloaded_video = []
                 if data['type'] == 'video':
-                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'])
+                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'], data['iTunesSync'])
                 if data['type'] == 'playlist':
-                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'])
+                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'], data['iTunesSync'])
+                if data['iTunesSync']:
+                    iTunesSync(data['path'])
             else:
                 logging.error("Some data was not received")
+            break
         if data['action'] == 'select_folder':
             path = select_folder()
             logging.info(f"Selected folder path: {path}")
             send_message({'path': path})
+            break
 
 if __name__ == "__main__":
     main()

@@ -32,7 +32,7 @@ if %ERRORLEVEL% neq 0 (
 echo Checking and installing required Python libraries...
 
 :: Set the libraries to install
-set "LIBRARIES=tk pytube beautifulsoup4 requests"
+set "LIBRARIES=tk pytubefix beautifulsoup4 requests"
 
 :: Install each library
 for %%i in (%LIBRARIES%) do (

@@ -58,10 +58,18 @@ button:hover {
     margin-bottom: 10px; 
 }
 
-#selectFolderButton {
+#selectFolderButtonStandard {
     margin-top: 10px; 
 }
 
-#selectedFolderPath {
+#selectedFolderPathStandard {
+    text-align: center;
+}
+
+#selectFolderButtoniTunesSync {
+    margin-top: 10px; 
+}
+
+#selectedFolderPathiTunesSync {
     text-align: center;
 }
