@@ -14,11 +14,10 @@ browser.browserAction.onClicked.addListener((tab) => {
             if (response.url.includes("youtube.com/playlist")){
                 sendMessageToNativeApp(tab, response.url, downloadFormat, downloadPath, downloadResolution, "playlist", startTime, endTime, filenamePreference, iTunesSync);
             }
-        }); //
+        }).catch(error => console.error(`Error sending message to content script: ${error}`));
     });
 });
 
-// .catch(error => console.error(`Error sending message to content script: ${error}`));
 function sendMessageToNativeApp(tab, url, format, path, resolution, type, startTime, endTime, filenamePreference, iTunesSync) {
     var message = {action: 'download', url: url, format: format, path: path, resolution: resolution, type: type, startTime: startTime, endTime: endTime, filenamePreference : filenamePreference, iTunesSync : iTunesSync};
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', message, response => {
