@@ -37,14 +37,12 @@
                 </select>
             </fieldset>
 
-            <div>
-                <label for="start-time">Start Time:</label>
-                <input type="text" id="start-time" placeholder="HH:MM:SS">
-            </div>
-            <div>
-                <label for="end-time">End Time:</label>
-                <input type="text" id="end-time" placeholder="HH:MM:SS">
-            </div>
+            <fieldset>
+                <legend>Timestamps (one per line, format: Start - End):</legend>
+                <textarea id="timestamps" placeholder="HH:MM:SS - HH:MM:SS
+HH:MM:SS - HH:MM:SS
+        ..."></textarea>
+            </fieldset>
 
             <fieldset>
                 <legend>Filename preference:</legend>

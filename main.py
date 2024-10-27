@@ -9,6 +9,7 @@ from tkinter import Tk, filedialog
 import requests
 import win32com.client
 
+
 # Setup logging
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -22,29 +23,53 @@ def get_complete_video_title(video_url):
         complete_title = complete_title[:-10]
     return complete_title
 
-def download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync):
+def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
         if filenamePreference:
             complete_title = get_complete_video_title(video_url)
             for c in '<>:"/\\|?*':
-                complete_title = complete_title.replace(c," ")
+                complete_title = complete_title.replace(c, " ")
         else: 
             complete_title = f"output_{len(os.listdir(path))}"
-        downloaded_video.append(f"{complete_title}.{format}")
         yt = YouTube(video_url)
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
-            if iTunesSync:
+            if iTunesSync and not timestamps:
                 '''
-                Mp3 files downlaoded with pytubefix do not include metadata
+                Mp3 files downloaded with pytubefix do not include metadata such as bitrate that itunes needs to import them. 
                 '''
                 stream.download(output_path=path, filename="audio.mp3")
                 input_path = os.path.join(path, "audio.mp3")
-                subprocess.run(f'ffmpeg -i "{input_path}" -map 0:a:0 -acodec mp3 -write_xing 0 "{os.path.join(path, f"{complete_title}.mp3")}"')
+                subprocess.run(["ffmpeg", "-i", input_path, "-acodec" ,"mp3", os.path.join(path, f"{complete_title}.mp3")], check=True)
+                downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
                 stream.download(output_path=path, filename=f"{complete_title}.mp3")
+
+            if timestamps:
+                uncut_path = os.path.join(path, f"{complete_title}.mp3")
+                for i, ts in enumerate(timestamps):
+                    part_filename = f"{complete_title}_part_{i+1}.mp3"
+                    part_path = os.path.join(path, part_filename)
+                    ffmpeg_cmd = ['ffmpeg']
+
+                    if ts['startTime']:
+                        ffmpeg_cmd += ['-ss', ts['startTime']]
+
+                    if ts['endTime']:
+                        ffmpeg_cmd += ['-to', ts['endTime']]
+                
+                    ffmpeg_cmd += ['-i', uncut_path, '-c:a', 'mp3', part_path]
+                    subprocess.run(ffmpeg_cmd, check=True)
+
+                    if iTunesSync:
+                        downloaded_video.append(part_filename)
+                    
+                    logging.info(f"{part_filename} downloaded successfully.")
+                os.remove(uncut_path)
+            else:
+                logging.info(f"{complete_title} downloaded successfully.")
         else:
             '''
             From what i've tested, there was no stream with audio and video (ie where progressive = True) for all resolution available and the highest was very low.
@@ -56,36 +81,72 @@ def download_video(video_url, path, format, resolution, startTime, endTime, file
                 available_resolutions.sort()
                 send_message({
                     'error': f"No streams available at resolution {resolution}",
-                    'availableResolutions': list(available_resolutions)
+                    'availableResolutions': available_resolutions
                 })
                 logging.error(f"No streams available at resolution {resolution}, here is the list of all available resolutions {list(available_resolutions)}")
                 return
-            audio_stream = yt.streams.filter(only_audio=True,file_extension='mp4').first()
-            audio_stream.download(output_path=path, filename="audio.mp4")
-            video_stream.download(output_path=path, filename="video.mp4")
-            audio_path = os.path.join(path, "audio.mp4")
-            video_path = os.path.join(path, "video.mp4")
-            subprocess.run(["ffmpeg", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", os.path.join(path, f'{complete_title}.mp4')], check=True, text=True)
-            os.remove(audio_path)
-            os.remove(video_path)
+            if video_stream.is_progressive:
+                video_stream.download(output_path=path, filename=f"{complete_title}.mp4")
+                if timestamps:
+                    uncut_path = os.path.join(path, f"{complete_title}.mp4")
+                    for i, ts in enumerate(timestamps):
+                        part_filename = f"{complete_title}_part_{i+1}.mp4"
+                        part_path = os.path.join(path, part_filename)
+                        ffmpeg_cmd = ['ffmpeg']
 
-        if startTime or endTime:
-            uncut_path = os.path.join(path, f"{complete_title}.{format}")
-            temp_path = os.path.join(path, f"{complete_title}_temp.{format}")
-            ffmpeg_cmd = ['ffmpeg', '-i', uncut_path]
+                        if ts['startTime']:
+                            ffmpeg_cmd += ['-ss', ts['startTime']]
 
-            if startTime is not None:
-                ffmpeg_cmd += ['-ss', startTime]
+                        if ts['endTime']:
+                            ffmpeg_cmd += ['-to', ts['endTime']]
+                    
+                        ffmpeg_cmd += ['-i', uncut_path, '-c:a', 'mp3', '-c:v', 'copy', part_path]
+                        subprocess.run(ffmpeg_cmd, check=True)
 
-            if endTime is not None:
-                ffmpeg_cmd += ['-to', endTime]
-                
-            ffmpeg_cmd += ['-c', 'copy', temp_path]
-            subprocess.run(ffmpeg_cmd, check=True)
-            os.remove(uncut_path)
-            os.rename(temp_path,uncut_path)
+                        if iTunesSync:
+                            downloaded_video.append(part_filename)
+                        
+                        logging.info(f"{part_filename} downloaded successfully.")
+                    os.remove(uncut_path)
+            else:    
+                audio_stream = yt.streams.get_audio_only()
+                video_stream.download(output_path=path, filename="video.mp4")
+                audio_stream.download(output_path=path, filename="audio.mp3")
+                video_path = os.path.join(path, "video.mp4")
+                audio_path = os.path.join(path, "audio.mp3")
 
-        logging.info(f"{complete_title} downloaded successfully.")
+                if timestamps:
+                    for i, ts in enumerate(timestamps):
+                        video_part_path = os.path.join(path,f"video_part_{i+1}.mp4")
+                        audio_part_path = os.path.join(path,f"audio_part_{i+1}.mp3")
+                        output_part_filename = f"{complete_title}_part_{i+1}.mp4"
+                        output_part_path = os.path.join(path, output_part_filename)
+                        ffmpeg_cmd = ['ffmpeg']
+
+                        if ts['startTime']:
+                            ffmpeg_cmd += ['-ss', ts['startTime']]
+
+                        if ts['endTime']:
+                            ffmpeg_cmd += ['-to', ts['endTime']]
+                        logging.info(ts['startTime'])
+                        logging.info(ts['endTime'])
+                        video_ffmpeg_cmd = ffmpeg_cmd + ['-i', video_path, '-c:v', 'copy', video_part_path]
+                        audio_ffmpeg_cmd = ffmpeg_cmd + ['-i', audio_path, '-c:a', 'mp3', audio_part_path]
+                        subprocess.run(video_ffmpeg_cmd, check=True)
+                        subprocess.run(audio_ffmpeg_cmd, check=True)
+                        subprocess.run(["ffmpeg", "-i", video_part_path, "-i", audio_part_path, "-c", "copy", output_part_path], check=True)
+                        os.remove(video_part_path)
+                        os.remove(audio_part_path)
+                        if iTunesSync:
+                            downloaded_video.append(output_part_filename)
+                        logging.info(f"{output_part_filename} downloaded successfully.")
+                else:
+                    subprocess.run(["ffmpeg", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "mp3", os.path.join(path, f'{complete_title}.mp4')], check=True)
+                    if iTunesSync:
+                        downloaded_video.append(f"{complete_title}.mp4")
+                    logging.info(f"{complete_title} downloaded successfully.")
+                os.remove(audio_path)
+                os.remove(video_path)
     except Exception as e:
         logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
@@ -98,7 +159,7 @@ def iTunesSync(path):
     iTunes = win32com.client.Dispatch("iTunes.Application")
     library = iTunes.LibraryPlaylist
     for filename in downloaded_video:
-        library.AddFile(os.path.join(path, filename))
+        library.AddFile(os.path.join(os.path.abspath(path), filename))
 
 def select_folder():
     """Open a folder selection dialog and return the selected path."""
@@ -134,13 +195,13 @@ def main():
     while True:
         data = read_message()
         if data['action'] == 'download':
-            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'endTime' in data and 'startTime' in data and 'filenamePreference' in data and 'iTunesSync' in data:
-                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, startTime: {data['startTime']}, endTime: {data['endTime']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
+            if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
+                logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
                 downloaded_video = []
                 if data['type'] == 'video':
-                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'], data['iTunesSync'])
+                    download_video(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['type'] == 'playlist':
-                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['startTime'], data['endTime'], data['filenamePreference'], data['iTunesSync'])
+                    download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['iTunesSync']:
                     iTunesSync(data['path'])
             else:

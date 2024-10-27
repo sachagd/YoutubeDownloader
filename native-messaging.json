@@ -3,5 +3,5 @@
   "description": "Handles video downloading and conversion tasks for the YouTube Downloader extension",
   "path": "main.bat",
   "type": "stdio",
-  "allowed_extensions": ["413f1713f83287183a26e98dd61029d39df805a0@temporary-addon"]
+  "allowed_extensions": ["48cab62f47302336824a6d6e4eeb56a0eda25f74@temporary-addon"]
 }

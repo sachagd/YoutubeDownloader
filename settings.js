@@ -22,14 +22,14 @@ document.getElementById('resolution-select').addEventListener('change', () => {
     browser.storage.local.set({downloadResolution: selectedResolution});
 });
 
-document.getElementById('start-time').addEventListener('input', () => {
-    const startTime = document.getElementById('start-time').value;
-    browser.storage.local.set({startTime: startTime});
-});
-
-document.getElementById('end-time').addEventListener('input', () => {
-    const endTime = document.getElementById('end-time').value;
-    browser.storage.local.set({endTime: endTime});
+document.getElementById('timestamps').addEventListener('input', () => {
+    const input = document.getElementById('timestamps').value.trim();
+    const lines = input.split('\n').filter(Boolean);
+    const timestamps = lines.map(line => {
+        const [startTime, endTime] = line.split('-').map(str => str.trim());
+        return { startTime, endTime };
+    });
+    browser.storage.local.set({timestamps: timestamps});
 });
 
 document.querySelectorAll('input[name="filenamePreference"]').forEach(radio => {
@@ -48,8 +48,10 @@ document.getElementById('selectFolderButtonStandard').addEventListener('click', 
         if (browser.runtime.lastError) {
             alert('Failed to connect to the native application. Please ensure it is installed and configured correctly.');
         } else {
-            document.getElementById('selectedFolderPathStandard').textContent = 'Selected folder: ' + response.path;
-            browser.storage.local.set({downloadPathStandard: response.path});
+            if (response.path !== ""){
+                document.getElementById('selectedFolderPathStandard').textContent = 'Selected folder: ' + response.path;
+                browser.storage.local.set({downloadPathStandard: response.path});
+            }
         }
     });
 });
@@ -68,8 +70,10 @@ document.getElementById('selectFolderButtoniTunesSync').addEventListener('click'
         if (browser.runtime.lastError) {
             alert('Failed to connect to the native application. Please ensure it is installed and configured correctly.');
         } else {
+            if (response.path !== ""){
             document.getElementById('selectedFolderPathiTunesSync').textContent = 'Selected folder: ' + response.path;
             browser.storage.local.set({downloadPathiTunesSync: response.path});
+            }
         }
     });
 });
