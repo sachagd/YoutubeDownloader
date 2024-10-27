@@ -150,10 +150,10 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
     except Exception as e:
         logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
-def download_playlist(playlist_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync):
+def download_playlist(playlist_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
-        download_video(video_url, path, format, resolution, startTime, endTime, filenamePreference, iTunesSync)
+        download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync)
 
 def iTunesSync(path):
     iTunes = win32com.client.Dispatch("iTunes.Application")
