@@ -36,5 +36,6 @@ To modify the settings of the extension:
 
 ## Additional Information
 - By default, files are saved in the extension directory, in a folder named `output`.
-- The **Start Time** and **End Time** boxes are empty by default, meaning the entire YouTube video will be downloaded.
-- The format for Start Time and End Time is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
+- The **Timestamps** box is empty by default, meaning the entire YouTube video will be downloaded.
+- The format for the timestamps is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
+- iTunesSync allows you to automatically add songs to your itunes library.
