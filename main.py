@@ -37,11 +37,11 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
                 '''
-                Mp3 files downloaded with pytubefix do not include metadata such as bitrate that itunes needs to import them. 
+                Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
                 '''
-                stream.download(output_path=path, filename="audio.mp3")
-                input_path = os.path.join(path, "audio.mp3")
-                subprocess.run(["ffmpeg", "-i", input_path, "-acodec" ,"mp3", os.path.join(path, f"{complete_title}.mp3")], check=True)
+                stream.download(output_path=path, filename=f"{complete_title}_audio.mp3")
+                input_path = os.path.join(path, f"{complete_title}_audio.mp3")
+                subprocess.run(["ffmpeg", "-y", "-nostdin", "-i", input_path, "-acodec", "mp3", os.path.join(path, f"{complete_title}.mp3")], check=True)
                 downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
@@ -52,7 +52,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 for i, ts in enumerate(timestamps):
                     part_filename = f"{complete_title}_part_{i+1}.mp3"
                     part_path = os.path.join(path, part_filename)
-                    ffmpeg_cmd = ['ffmpeg']
+                    ffmpeg_cmd = ['ffmpeg', '-y', "-nostdin"]
 
                     if ts['startTime']:
                         ffmpeg_cmd += ['-ss', ts['startTime']]
@@ -92,7 +92,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                     for i, ts in enumerate(timestamps):
                         part_filename = f"{complete_title}_part_{i+1}.mp4"
                         part_path = os.path.join(path, part_filename)
-                        ffmpeg_cmd = ['ffmpeg']
+                        ffmpeg_cmd = ['ffmpeg', '-y', '-nostdin']
 
                         if ts['startTime']:
                             ffmpeg_cmd += ['-ss', ts['startTime']]
@@ -121,7 +121,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                         audio_part_path = os.path.join(path,f"audio_part_{i+1}.mp3")
                         output_part_filename = f"{complete_title}_part_{i+1}.mp4"
                         output_part_path = os.path.join(path, output_part_filename)
-                        ffmpeg_cmd = ['ffmpeg']
+                        ffmpeg_cmd = ['ffmpeg', '-y', '-nostdin']
 
                         if ts['startTime']:
                             ffmpeg_cmd += ['-ss', ts['startTime']]
@@ -134,14 +134,14 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                         audio_ffmpeg_cmd = ffmpeg_cmd + ['-i', audio_path, '-c:a', 'mp3', audio_part_path]
                         subprocess.run(video_ffmpeg_cmd, check=True)
                         subprocess.run(audio_ffmpeg_cmd, check=True)
-                        subprocess.run(["ffmpeg", "-i", video_part_path, "-i", audio_part_path, "-c", "copy", output_part_path], check=True)
+                        subprocess.run(["ffmpeg", "-y", "-nostdin", "-i", video_part_path, "-i", audio_part_path, "-c", "copy", output_part_path], check=True)
                         os.remove(video_part_path)
                         os.remove(audio_part_path)
                         if iTunesSync:
                             downloaded_video.append(output_part_filename)
                         logging.info(f"{output_part_filename} downloaded successfully.")
                 else:
-                    subprocess.run(["ffmpeg", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "mp3", os.path.join(path, f'{complete_title}.mp4')], check=True)
+                    subprocess.run(["ffmpeg", "-y", "-nostdin", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "mp3", os.path.join(path, f'{complete_title}.mp4')], check=True)
                     if iTunesSync:
                         downloaded_video.append(f"{complete_title}.mp4")
                     logging.info(f"{complete_title} downloaded successfully.")
