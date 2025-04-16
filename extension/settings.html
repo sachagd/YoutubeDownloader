@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Download Settings</title>
+</head>
+<body>
+    <div class="settings-container">
+        <h1>Download Preferences</h1>
+        <form id="settings-form">
+            <fieldset>
+                <legend>Choose download format:</legend>
+                <div>
+                    <input type="radio" id="format-mp3" name="format" value="mp3" checked>
+                    <label for="format-mp3">MP3 (Audio)</label>
+                </div>
+                <div>
+                    <input type="radio" id="format-mp4" name="format" value="mp4">
+                    <label for="format-mp4">MP4 (Video)</label>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Select resolution:</legend>
+                <select id="resolution-select" disabled>
+                    <option value="144p">144p</option>
+                    <option value="240p">240p</option>
+                    <option value="360p">360p</option>
+                    <option value="480p">480p</option>
+                    <option value="720p">720p</option>
+                    <option value="1080p" selected>1080p</option>
+                    <option value="1440p">1440p</option>
+                    <option value="2160p">4K</option>
+                    <option value="4320p">8K</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Timestamps (one per line, format: Start - End):</legend>
+                <textarea id="timestamps" placeholder="HH:MM:SS - HH:MM:SS
+HH:MM:SS - HH:MM:SS
+        ..."></textarea>
+            </fieldset>
+
+            <fieldset>
+                <legend>Filename preference:</legend>
+                <div>
+                    <input type="radio" id="filename-title" name="filenamePreference" value="title" checked>
+                    <label for="filename-title">Use YouTube Video Title</label>
+                </div>
+                <div>
+                    <input type="radio" id="filename-output" name="filenamePreference" value="output">
+                    <label for="filename-output">Use generic 'output' name</label>
+                </div>
+            </fieldset>
+
+            <div style="text-align:center">
+                <button type="button" id="selectFolderButtonStandard">Select Download Folder</button>
+                <p id="selectedFolderPathStandard">No folder selected</p>
+            </div>
+
+            <fieldset>
+                <legend>iTunesSync</legend>
+                <input type="checkbox" id="iTunesSync">
+                <label for="iTunesSync" >Enabled</label>
+
+                <div style="text-align:center">
+                    <button type="button" id="selectFolderButtoniTunesSync">Select Download Folder</button>
+                    <p id="selectedFolderPathiTunesSync">No folder selected</p>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <script src="settings.js"></script>
+</body>
+</html>

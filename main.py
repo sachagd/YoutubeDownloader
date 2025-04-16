@@ -128,6 +128,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
 
                         if ts['endTime']:
                             ffmpeg_cmd += ['-to', ts['endTime']]
+                            
                         logging.info(ts['startTime'])
                         logging.info(ts['endTime'])
                         video_ffmpeg_cmd = ffmpeg_cmd + ['-i', video_path, '-c:v', 'copy', video_part_path]
@@ -147,6 +148,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                     logging.info(f"{complete_title} downloaded successfully.")
                 os.remove(audio_path)
                 os.remove(video_path)
+        send_message({'action' : "files have been downloaded successfully"})
     except Exception as e:
         logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
