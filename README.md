@@ -2,24 +2,16 @@
 
 **YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos and playlist in mp3 and mp4 format. It also allows you to select specific parts of a video and choose a resolution for mp4 files.
 
+This repository represent the local part of the extension. The extension will not work if you don't install the corresponding [extension](https://addons.mozilla.org/fr/firefox/addon/youtubedownloader/) in Firefox.
+
 ## Prerequisites
-Before using the extension, you must download a few dependencies:
+Before using the extension, you must download a few dependencies, you can do the steps manually if you want or if you use linux:
 
 **Execute `init.bat` in Administrator mode:**
    - Installs `pip` if it's not already installed.
    - Installs Python libraries: `Tkinter`, `BeautifulSoup`, `requests`, and `pytubefix`.
    - Installs `ffmpeg` if it's not already installed and adds the file path to the `PATH` environment variable.
    - Adds a registry key.
-
-## Installation Steps
-To install the extension in Firefox, follow these steps:
-
-1. Open a new Firefox tab and enter `about:debugging`.
-2. Navigate to **This Firefox** on the left side of the tab.
-3. Click on **Load Temporary Add-on...**.
-4. Select `manifest.json`.
-5. Copy the Extension ID.
-6. Paste it in `native-messaging.json` in `allowed_extensions`.
 
 ## How to Use the Extension
 Once the extension is properly installed:
