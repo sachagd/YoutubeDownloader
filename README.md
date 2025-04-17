@@ -4,11 +4,8 @@
 
 This repository represent the local part of the extension. It will not work if you don't install the corresponding [extension](https://addons.mozilla.org/fr/firefox/addon/youtubedownloader/) in Firefox.
 
-## Prerequisites  
-Before using the extension, you must download a few dependencies.  
-(You can perform the steps manually if you prefer, or if you’re on Linux.)
-
-1. **Download the [local part](https://github.com/sachagd/YoutubeDownloader/releases/download/v1.0/local.zip) and unzip it**
+## Installation  
+1. **Download the** [local part](https://github.com/sachagd/YoutubeDownloader/releases/download/v1.0/local.zip) **and unzip it**
 
 2. **Execute `init.bat` in Administrator mode:**  
    - Installs `pip` if it's not already installed.  
@@ -16,6 +13,7 @@ Before using the extension, you must download a few dependencies.
    - Installs `ffmpeg` if it's not already installed and adds the file path to the `PATH` environment variable.  
    - Adds a registry key.
 
+   Do the steps manually for linux and macOS users
 
 ## How to Use the Extension
 Once the extension is properly installed:
