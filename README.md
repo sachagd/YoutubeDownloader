@@ -1,35 +1,35 @@
 # YouTubeDownloader
 
-**YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos and playlist in mp3 and mp4 format. It also allows you to select specific parts of a video and choose a resolution for mp4 files.
+**YouTubeDownloader** is a Firefox extension that allows you to download YouTube videos and playlists in MP3 and MP4 formats. You can also select specific parts of a video and choose the resolution for MP4 files.
 
-This repository represent the local part of the extension. It will not work if you don't install the corresponding [extension](https://addons.mozilla.org/fr/firefox/addon/youtubedownloader/) in Firefox.
+This repository represents the local component of the extension. It will not work unless you install the corresponding [Firefox add-on](https://addons.mozilla.org/fr/firefox/addon/youtubedownloader/).
 
-## Installation  
-1. **Download the** [local part](https://github.com/sachagd/YoutubeDownloader/releases/download/v1.0/local.zip) **and unzip it**
+## Installation
 
-2. **Execute `init.bat` in Administrator mode:**  
-   - Installs `pip` if it's not already installed.  
-   - Installs Python libraries: `Tkinter`, `BeautifulSoup`, `requests`, and `pytubefix`.  
-   - Installs `ffmpeg` if it's not already installed and adds the file path to the `PATH` environment variable.  
-   - Adds a registry key.
+1. **Download the** [local component](https://github.com/sachagd/YoutubeDownloader/releases/download/v1.2) **and unzip it. Do not execute `main.exe`.**
 
-   Do the steps manually for linux and macOS users
+   **Warning:** `main.exe` is flagged as a Trojan by Windows Defender because from its perspective it is a random exe file that downloads content from the internet. As a result, `init.bat` runs a command to exclude its folder from Defender scans. Proceed means that you completely trust me; otherwise, download the source code to use it directly or build the project yourself.
+
+2. **Run `init.bat` as Administrator**  
+   - Excludes the folder from Defender  
+   - Adds the native messaging registry key  
+
+   Linux and macOS users must use the source code.
 
 ## How to Use the Extension
-Once the extension is properly installed:
-1. Navigate to the YouTube video or playlist you want to download.
-2. Click on the extension button in the top right corner of Firefox.
-3. Click on the YouTubeDownloader extension to start the download process.
+
+1. Navigate to the YouTube video or playlist you want to download.  
+2. Click the extension icon in the Firefox toolbar.  
+3. Select your options and start the download.
 
 ## Accessing Extension Settings
-To modify the settings of the extension:
 
-1. Open a new Firefox tab and enter `about:addons`.
-2. Click on the extension.
-3. Click on **Options**.
+1. Open a new tab and go to `about:addons`.  
+2. Find **YouTubeDownloader** in the list.  
+3. Click **Options** to adjust settings.
 
 ## Additional Information
-- By default, files are saved in the extension directory, in a folder named `output`.
+- By default, files are saved in the extension directory, in a folder named output.
 - The **Timestamps** box is empty by default, meaning the entire YouTube video will be downloaded.
-- The format for the timestamps is `HH:MM:SS`. Formats like `1:15` or `10` are understood as 1 minute 15 seconds and 10 seconds respectively.
+- The format for the timestamps is HH:MM:SS.MS (ffmpeg format). For instance, formats like 1:15 or 10 are understood as 1 minute 15 seconds and 10 seconds respectively.
 - iTunesSync allows you to automatically add songs to your itunes library.
