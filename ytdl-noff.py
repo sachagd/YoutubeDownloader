@@ -24,26 +24,33 @@ def get_complete_video_title(video_url):
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
+        logging.info("into the download_video")
         if filenamePreference:
             complete_title = get_complete_video_title(video_url)
+            logging.info("got the complete title")
             for c in '<>:"/\\|?*':
                 complete_title = complete_title.replace(c, " ")
         else:
             complete_title = f"output_{len(os.listdir(path))}"
         yt = YouTube(video_url)
         if format == 'mp3':
+            logging.info("searching the audio")
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
                 '''
                 Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
                 '''
+                logging.info("downloading the audio")
                 stream.download(output_path=path, filename=f"{complete_title}_audio.mp3")
+                logging.info("downloaded the audio")
                 input_path = os.path.join(path, f"{complete_title}_audio.mp3")
                 subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', input_path, '-acodec', 'mp3', os.path.join(path, f"{complete_title}.mp3")], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
                 downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
+                logging.info("downloading the audio")
                 stream.download(output_path=path, filename=f"{complete_title}.mp3")
+                logging.info("downloaded the audio")
 
             if timestamps:
                 uncut_path = os.path.join(path, f"{complete_title}.mp3")
@@ -150,6 +157,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
 def download_playlist(playlist_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
+        logging.info(video_url)
         download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync)
 
 def iTunesSync(path):
@@ -191,6 +199,7 @@ def main():
     global downloaded_video
     while True:
         data = read_message()
+        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
