@@ -36,6 +36,9 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
         if format == 'mp3':
             logging.info("searching the audio")
             stream = yt.streams.get_audio_only()
+            logging.info("got the audio")
+            logging.info(stream)
+            logging.info(yt.streams)
             if iTunesSync and not timestamps:
                 '''
                 Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
