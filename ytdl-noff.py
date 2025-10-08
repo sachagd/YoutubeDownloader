@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import subprocess
-from pytubefix import YouTube, Playlist
+from pytubefix import YouTube, Playlist, request
 from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
@@ -24,6 +24,7 @@ def get_complete_video_title(video_url):
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
+        
         logging.info("into the download_video")
         if filenamePreference:
             complete_title = get_complete_video_title(video_url)
@@ -201,12 +202,13 @@ def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
     while True:
-        data = read_message()
-        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        # data = read_message()
+        data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
                 downloaded_video = []
+                request.default_timeout = 15
                 if data['type'] == 'video':
                     download_video(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['type'] == 'playlist':
