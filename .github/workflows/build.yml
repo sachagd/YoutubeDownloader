@@ -24,23 +24,11 @@ jobs:
           pip install pyinstaller pytubefix beautifulsoup4 requests pywin32
 
       - name: Build YoutubeDownloader (without FFmpeg)
-        run: |
-          pyinstaller ^
-            --onedir ^
-            --noconfirm ^
-            --name "ytdl-noff" ^
-            --noconsole ^
-            ytdl-noff.py
+        run: pyinstaller --onedir --noconfirm --name "ytdl-noff" --noconsole ytdl-noff.py
 
       - name: Build YoutubeDownloader (with FFmpeg)
-        run: |
-          pyinstaller ^
-            --onedir ^
-            --noconfirm ^
-            --name "ytdl-ff" ^
-            --noconsole ^
-            --add-data "dependencies;dependencies" ^
-            ytdl-ff.py
+        run: pyinstaller --onedir --noconfirm --name "ytdl-ff" --noconsole --add-data "dependencies;dependencies" ytdl-ff.py
+
 
       - name: Zip both builds
         run: |
