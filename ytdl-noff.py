@@ -58,7 +58,11 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 os.remove(input_path)
             else:
                 logging.info("downloading the audio")
-                stream.download(output_path=path, filename=f"{complete_title}.mp3")
+                t = threading.Thread(target=lambda: stream.download(output_path=path, filename=f"{complete_title}.mp3"))
+                t.start()
+                t.join(60)  # wait 60s max
+                if t.is_alive():
+                    raise TimeoutError(f"Download stuck for {complete_title}")
                 logging.info("downloaded the audio")
 
             if timestamps:
