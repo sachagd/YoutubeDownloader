@@ -9,6 +9,7 @@ from tkinter import Tk, filedialog
 import requests
 import win32com.client
 import threading
+import time
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -62,10 +63,14 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 logging.info("roergoepgreroegerreg")
                 t.start()
                 logging.info("fsfddfs")
-                t.join(60)  # wait 60s max
-                logging.info("efisiegrrgrergegergrefji")
+                start = time.time()
+                logging.info("fehseifesij")
+                while t.is_alive() and time.time() - start < 60:
+                    time.sleep(0.5)
+                    logging.info(time.time() - start)
+                logging.info("uuhfuhsedhu")
                 if t.is_alive():
-                    logging.info("efisifji")
+                    logging.warning(f"Download appears stuck for {complete_title}, skipping...")
                     raise TimeoutError(f"Download stuck for {complete_title}")
                 logging.info("downloaded the audio")
 
