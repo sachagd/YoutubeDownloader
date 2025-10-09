@@ -16,11 +16,17 @@ logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(a
 
 def get_complete_video_title(video_url):
     """ Extracts and returns the complete title of the YouTube video. """
+    logging.info("1")
     response = requests.get(video_url)
+    logging.info("2")
     soup = BeautifulSoup(response.content, 'html.parser')
+    logging.info("3")
     title_tag = soup.find("title")
+    logging.info("4")
     complete_title = title_tag.text.strip()
+    logging.info("5")
     if complete_title.endswith(" - YouTube"):
+        logging.info("6")
         complete_title = complete_title[:-10]
     return complete_title
 
@@ -30,13 +36,16 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
         
         logging.info("into the download_video")
         if filenamePreference:
+            logging.info("ejyjtejjyejy")
             complete_title = get_complete_video_title(video_url)
             logging.info("got the complete title")
             for c in '<>:"/\\|?*':
+                logging.info("ergeriregjergigerigreigreijgreij")                
                 complete_title = complete_title.replace(c, " ")
         else:
             complete_title = f"output_{len(os.listdir(path))}"
         importlib.reload(pytubefix.request)
+        logging.info("ergthetehehehrehteehteij")     
         yt = YouTube(video_url)
         if format == 'mp3':
             logging.info("searching the audio")
@@ -61,7 +70,10 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 logging.info("fsfddfs")
                 start = time.time()
                 logging.info("fehseifesij")
+                logging.info(t.is_alive())
+                logging.info("rtohrtohkotkho")
                 while t.is_alive() and time.time() - start < 60:
+                    logging.info("ofosjofjofojfooj")
                     time.sleep(0.5)
                     logging.info(time.time() - start)
                 logging.info("uuhfuhsedhu")
