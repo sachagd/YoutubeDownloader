@@ -63,56 +63,45 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 os.remove(input_path)
             else:
                 # stream.download(output_path=path, filename=f"{complete_title}.mp3")
-                logging.info(f"[DL-START] {complete_title}")
+                UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36"
 
-                try:
-                    # reset pytubefix session each time to avoid stale sockets
-                    if getattr(req, "default_session", None):
-                        try:
-                            req.default_session.close()
-                        except Exception as e:
-                            logging.warning(f"close-session error: {e}")
+                dest = os.path.join(path, f"{complete_title}.mp3")
+                url  = stream.url  # resolved by pytubefix; we only change how we fetch it
 
-                    s = requests.Session()
-                    s.headers.update(req.default_headers)
-                    s.headers["Connection"] = "close"
-                    req.default_session = s
-
-                    url = stream.url
-                    dest = os.path.join(path, f"{complete_title}.mp3")
-
-                    logging.info(f"[DL-REQ] GET {url}")
-                    with s.get(url, stream=True, timeout=(5, 30)) as r:
-                        logging.info(f"[DL-RESP] {r.status_code}")
+                def _fetch_once(u, out_path, label):
+                    logging.info(f"[DL-REQ] {label}")
+                    with requests.get(
+                        u,
+                        stream=True,
+                        headers={"User-Agent": UA, "Connection": "close"},
+                        timeout=(5, 30),              # (connect, read) timeouts
+                    ) as r:
+                        logging.info(f"[DL-RESP] {label}: {r.status_code}")
                         r.raise_for_status()
-                        total = 0
-                        with open(dest, "wb") as f:
+                        written = 0
+                        with open(out_path, "wb") as f:
                             for chunk in r.iter_content(chunk_size=1024 * 1024):
                                 if not chunk:
                                     continue
                                 f.write(chunk)
-                                total += len(chunk)
-                                if total % (5 * 1024 * 1024) < 1024 * 1024:
-                                    logging.info(f"[DL-PROG] {total/1024/1024:.1f} MB written")
-                    size = os.path.getsize(dest)
-                    logging.info(f"[DL-DONE] {complete_title}, {size} bytes")
+                                written += len(chunk)
+                                # log every ~5MB without spamming
+                                if written >= 5*1024*1024 and written % (5*1024*1024) < 1024*1024:
+                                    logging.info(f"[DL-PROG] {label}: {written/1024/1024:.1f} MB")
 
-                    if size == 0:
-                        logging.warning("[DL-ZERO] retrying once with new session...")
-                        os.remove(dest)
-                        req.default_session = None
-                        yt = YouTube(video_url)
-                        stream = yt.streams.get_audio_only()
-                        url = stream.url
-                        with requests.get(url, stream=True, timeout=(5, 30)) as r2:
-                            with open(dest, "wb") as f2:
-                                for c in r2.iter_content(chunk_size=1024 * 1024):
-                                    if c:
-                                        f2.write(c)
-                        logging.info(f"[DL-RETRY-DONE] {complete_title}, {os.path.getsize(dest)} bytes")
+                # Attempt 1 (no connection reuse)
+                _fetch_once(url, dest, complete_title)
+                size = os.path.getsize(dest)
+                logging.info(f"[DL-DONE] {complete_title}: {size} bytes")
 
-                except Exception as e:
-                    logging.exception(f"[DL-ERR] {e}")
+                # 0-byte guard → refresh the signed URL and retry once
+                if size == 0:
+                    logging.warning(f"[DL-ZERO] {complete_title}: retrying once with refreshed URL…")
+                    os.remove(dest)
+                    yt2 = YouTube(video_url)  # refresh signature
+                    stream2 = yt2.streams.get_audio_only()
+                    _fetch_once(stream2.url, dest, f"{complete_title} (retry)")
+                    logging.info(f"[DL-RETRY-DONE] {complete_title}: {os.path.getsize(dest)} bytes")
 
             if timestamps:
                 uncut_path = os.path.join(path, f"{complete_title}.mp3")
