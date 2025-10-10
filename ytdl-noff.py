@@ -8,9 +8,10 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
 import win32com.client
-import threading
-import time
 import importlib, pytubefix.request
+import os, logging, requests
+from pytubefix import request as req
+
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -33,34 +34,6 @@ def get_complete_video_title(video_url):
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
-        
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        logging.info("into the download_video")
-        
         if filenamePreference:
             logging.info("ejyjtejjyejy")
             complete_title = get_complete_video_title(video_url)
@@ -89,24 +62,57 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
-                logging.info("downloading the audio")
-                t = threading.Thread(target=lambda: stream.download(output_path=path, filename=f"{complete_title}.mp3"))
-                logging.info("roergoepgreroegerreg")
-                t.start()
-                logging.info("fsfddfs")
-                start = time.time()
-                logging.info("fehseifesij")
-                logging.info(t.is_alive())
-                logging.info("rtohrtohkotkho")
-                while t.is_alive() and time.time() - start < 60:
-                    logging.info("ofosjofjofojfooj")
-                    time.sleep(0.5)
-                    logging.info(time.time() - start)
-                logging.info("uuhfuhsedhu")
-                if t.is_alive():
-                    logging.warning(f"Download appears stuck for {complete_title}, skipping...")
-                    raise TimeoutError(f"Download stuck for {complete_title}")
-                logging.info("downloaded the audio")
+                # stream.download(output_path=path, filename=f"{complete_title}.mp3")
+                logging.info(f"[DL-START] {complete_title}")
+
+                try:
+                    # reset pytubefix session each time to avoid stale sockets
+                    if getattr(req, "default_session", None):
+                        try:
+                            req.default_session.close()
+                        except Exception as e:
+                            logging.warning(f"close-session error: {e}")
+
+                    s = requests.Session()
+                    s.headers.update(req.default_headers)
+                    s.headers["Connection"] = "close"
+                    req.default_session = s
+
+                    url = stream.url
+                    dest = os.path.join(path, f"{complete_title}.mp3")
+
+                    logging.info(f"[DL-REQ] GET {url}")
+                    with s.get(url, stream=True, timeout=(5, 30)) as r:
+                        logging.info(f"[DL-RESP] {r.status_code}")
+                        r.raise_for_status()
+                        total = 0
+                        with open(dest, "wb") as f:
+                            for chunk in r.iter_content(chunk_size=1024 * 1024):
+                                if not chunk:
+                                    continue
+                                f.write(chunk)
+                                total += len(chunk)
+                                if total % (5 * 1024 * 1024) < 1024 * 1024:
+                                    logging.info(f"[DL-PROG] {total/1024/1024:.1f} MB written")
+                    size = os.path.getsize(dest)
+                    logging.info(f"[DL-DONE] {complete_title}, {size} bytes")
+
+                    if size == 0:
+                        logging.warning("[DL-ZERO] retrying once with new session...")
+                        os.remove(dest)
+                        req.default_session = None
+                        yt = YouTube(video_url)
+                        stream = yt.streams.get_audio_only()
+                        url = stream.url
+                        with requests.get(url, stream=True, timeout=(5, 30)) as r2:
+                            with open(dest, "wb") as f2:
+                                for c in r2.iter_content(chunk_size=1024 * 1024):
+                                    if c:
+                                        f2.write(c)
+                        logging.info(f"[DL-RETRY-DONE] {complete_title}, {os.path.getsize(dest)} bytes")
+
+                except Exception as e:
+                    logging.exception(f"[DL-ERR] {e}")
 
             if timestamps:
                 uncut_path = os.path.join(path, f"{complete_title}.mp3")
@@ -254,8 +260,8 @@ def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
     while True:
-        # data = read_message()
-        data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        data = read_message()
+        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
