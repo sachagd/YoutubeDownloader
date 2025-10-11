@@ -8,26 +8,17 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
 import win32com.client
-import importlib, pytubefix.request
-import os, logging, requests
-from pytubefix import request as req
 
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def get_complete_video_title(video_url):
     """ Extracts and returns the complete title of the YouTube video. """
-    logging.info("1")
     response = requests.get(video_url)
-    logging.info("2")
     soup = BeautifulSoup(response.content, 'html.parser')
-    logging.info("3")
     title_tag = soup.find("title")
-    logging.info("4")
     complete_title = title_tag.text.strip()
-    logging.info("5")
     if complete_title.endswith(" - YouTube"):
-        logging.info("6")
         complete_title = complete_title[:-10]
     return complete_title
 
@@ -35,23 +26,14 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
     """ Downloads the video and converts it to specified format. """
     try:
         if filenamePreference:
-            logging.info("ejyjtejjyejy")
             complete_title = get_complete_video_title(video_url)
-            logging.info("got the complete title")
             for c in '<>:"/\\|?*':
-                logging.info("ergeriregjergigerigreigreijgreij")                
                 complete_title = complete_title.replace(c, " ")
         else:
             complete_title = f"output_{len(os.listdir(path))}"
-        importlib.reload(pytubefix.request)
-        logging.info("ergthetehehehrehteehteij")     
         yt = YouTube(video_url)
         if format == 'mp3':
-            logging.info("searching the audio")
             stream = yt.streams.get_audio_only()
-            logging.info("got the audio")
-            logging.info(stream)
-            logging.info(yt.streams)
             if iTunesSync and not timestamps:
                 '''
                 Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
@@ -62,46 +44,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
-                # stream.download(output_path=path, filename=f"{complete_title}.mp3")
-                UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36"
-
-                dest = os.path.join(path, f"{complete_title}.mp3")
-                url  = stream.url  # resolved by pytubefix; we only change how we fetch it
-
-                def _fetch_once(u, out_path, label):
-                    logging.info(f"[DL-REQ] {label}")
-                    with requests.get(
-                        u,
-                        stream=True,
-                        headers={"User-Agent": UA, "Connection": "close"},
-                        timeout=(5, 30),              # (connect, read) timeouts
-                    ) as r:
-                        logging.info(f"[DL-RESP] {label}: {r.status_code}")
-                        r.raise_for_status()
-                        written = 0
-                        with open(out_path, "wb") as f:
-                            for chunk in r.iter_content(chunk_size=1024 * 1024):
-                                if not chunk:
-                                    continue
-                                f.write(chunk)
-                                written += len(chunk)
-                                # log every ~5MB without spamming
-                                if written >= 5*1024*1024 and written % (5*1024*1024) < 1024*1024:
-                                    logging.info(f"[DL-PROG] {label}: {written/1024/1024:.1f} MB")
-
-                # Attempt 1 (no connection reuse)
-                _fetch_once(url, dest, complete_title)
-                size = os.path.getsize(dest)
-                logging.info(f"[DL-DONE] {complete_title}: {size} bytes")
-
-                # 0-byte guard → refresh the signed URL and retry once
-                if size == 0:
-                    logging.warning(f"[DL-ZERO] {complete_title}: retrying once with refreshed URL…")
-                    os.remove(dest)
-                    yt2 = YouTube(video_url)  # refresh signature
-                    stream2 = yt2.streams.get_audio_only()
-                    _fetch_once(stream2.url, dest, f"{complete_title} (retry)")
-                    logging.info(f"[DL-RETRY-DONE] {complete_title}: {os.path.getsize(dest)} bytes")
+                stream.download(output_path=path, filename=f"{complete_title}.mp3")
 
             if timestamps:
                 uncut_path = os.path.join(path, f"{complete_title}.mp3")
