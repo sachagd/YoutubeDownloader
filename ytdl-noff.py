@@ -25,15 +25,19 @@ def get_complete_video_title(video_url):
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
-        if filenamePreference:
-            complete_title = get_complete_video_title(video_url)
-            for c in '<>:"/\\|?*':
-                complete_title = complete_title.replace(c, " ")
-        else:
-            complete_title = f"output_{len(os.listdir(path))}"
+        # if filenamePreference:
+        #     complete_title = get_complete_video_title(video_url)
+        #     for c in '<>:"/\\|?*':
+        #         complete_title = complete_title.replace(c, " ")
+        # else:
+        #     complete_title = f"output_{len(os.listdir(path))}"
+        logging.info("into the 'download_video' function")
         yt = YouTube(video_url)
+        complete_title = yt.title
         if format == 'mp3':
+            logging.info("just before 'stream = yt.streams.get_audio_only()'")
             stream = yt.streams.get_audio_only()
+            logging.info("just after 'stream = yt.streams.get_audio_only()'")
             if iTunesSync and not timestamps:
                 '''
                 Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
@@ -44,7 +48,9 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 downloaded_video.append(f"{complete_title}.mp3")
                 os.remove(input_path)
             else:
+                logging.info("just before 'stream.download'")
                 stream.download(output_path=path, filename=f"{complete_title}.mp3")
+                logging.info("just after 'stream.download'")
 
             if timestamps:
                 uncut_path = os.path.join(path, f"{complete_title}.mp3")
@@ -193,7 +199,7 @@ def main():
     global downloaded_video
     while True:
         data = read_message()
-        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo2X_dxb7oaVJalP2flxg529', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
