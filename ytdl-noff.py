@@ -197,6 +197,8 @@ def send_message(response):
 def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
+    os.environ["PYTUBE_NO_CACHE"] = "1"
+    os.environ["PYTUBE_NO_KEEPALIVE"] = "1"
     while True:
         data = read_message()
         # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
