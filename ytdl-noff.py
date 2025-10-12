@@ -1,8 +1,5 @@
-import os
-os.environ["PYTUBE_NO_CACHE"] = "1"
-os.environ["PYTUBE_NO_KEEPALIVE"] = "1"
-
 import sys
+import os
 import json
 import logging
 import subprocess
@@ -11,6 +8,26 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
 import win32com.client
+import pytubefix.request as request
+import urllib.request
+
+old_urlopen = request.urlopen
+
+def safe_urlopen(*args, **kwargs):
+    # pytube usually calls urlopen(Request(...)), but sometimes passes just the URL string.
+    if args and isinstance(args[0], urllib.request.Request):
+        req = args[0]
+        req.add_header("Connection", "close")
+        return old_urlopen(req, *args[1:], **kwargs)
+    elif args and isinstance(args[0], str):
+        # If it's just a URL string, create a Request and add header
+        req = urllib.request.Request(args[0], headers={"Connection": "close"})
+        return old_urlopen(req, *args[1:], **kwargs)
+    else:
+        # Fallback
+        return old_urlopen(*args, **kwargs)
+
+request.urlopen = safe_urlopen
 
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
@@ -201,8 +218,8 @@ def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
     while True:
-        data = read_message()
-        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        # data = read_message()
+        data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
