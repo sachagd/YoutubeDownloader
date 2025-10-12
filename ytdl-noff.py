@@ -1,3 +1,6 @@
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 import sys
 import os
 import json
@@ -8,27 +11,6 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 import requests
 import win32com.client
-import pytubefix.request as request
-import urllib.request
-
-old_urlopen = request.urlopen
-
-def safe_urlopen(*args, **kwargs):
-    # pytube usually calls urlopen(Request(...)), but sometimes passes just the URL string.
-    if args and isinstance(args[0], urllib.request.Request):
-        req = args[0]
-        req.add_header("Connection", "close")
-        return old_urlopen(req, *args[1:], **kwargs)
-    elif args and isinstance(args[0], str):
-        # If it's just a URL string, create a Request and add header
-        req = urllib.request.Request(args[0], headers={"Connection": "close"})
-        return old_urlopen(req, *args[1:], **kwargs)
-    else:
-        # Fallback
-        return old_urlopen(*args, **kwargs)
-
-request.urlopen = safe_urlopen
-
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
