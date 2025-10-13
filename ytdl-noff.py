@@ -1,5 +1,21 @@
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
+import ssl, urllib.request, socket, os
+
+# Optional but helpful: short, finite network waits
+socket.setdefaulttimeout(30)
+
+# (A) Prefer using certifi if present
+try:
+    import certifi
+    cafile = certifi.where()
+    # Let stdlib urllib use an HTTPS context with that CA bundle
+    ctx = ssl.create_default_context(cafile=cafile)
+    opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx))
+    urllib.request.install_opener(opener)
+    # Also help any other consumers:
+    os.environ.setdefault("SSL_CERT_FILE", cafile)
+except Exception:
+    # Fallback: leave default context; you can still temporarily test unverified below if needed
+    pass
 
 import sys
 import os
@@ -200,8 +216,8 @@ def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
     while True:
-        # data = read_message()
-        data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        data = read_message()
+        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
