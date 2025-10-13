@@ -149,7 +149,6 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                     logging.info(f"{complete_title} downloaded successfully.")
                 os.remove(audio_path)
                 os.remove(video_path)
-        send_message({'action': "files have been downloaded successfully"})
     except Exception as e:
         logging.exception(f"Failed to download and convert {complete_title}: {e}")
 
@@ -197,16 +196,18 @@ def main():
     """ Main loop to process incoming messages continuously. """
     global downloaded_video
     while True:
-        data = read_message()
-        # data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
+        # data = read_message()
+        data = {'action' : 'download', 'url' : 'https://www.youtube.com/playlist?list=PL-Lb9sJYEEo3lYa3uhVfyGRz1sYgiyaVL', 'format': 'mp3', 'path': 'output', 'resolution': None, 'type': 'playlist', 'timestamps': None, 'filenamePreference': True, 'iTunesSync': False}
         if data['action'] == 'download':
             if data and 'url' in data and 'format' in data and 'path' in data and 'type' in data and 'resolution' in data and 'timestamps' in data and 'filenamePreference' in data and 'iTunesSync' in data:
                 logging.info(f"Received YouTube URL: {data['url']}, format: {data['format']}, path: {data['path']}, resolution: {data['resolution']}, type: {data['type']}, timestamps: {data['timestamps']}, filenamePreference: {data['filenamePreference']} and iTunesSync: {data['iTunesSync']}")
                 downloaded_video = []
                 if data['type'] == 'video':
                     download_video(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
+                    send_message({'action': "files have been downloaded successfully"})
                 if data['type'] == 'playlist':
                     download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
+                    send_message({'action': "files have been downloaded successfully"})
                 if data['iTunesSync']:
                     iTunesSync(data['path'])
             else:
