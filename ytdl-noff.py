@@ -1,22 +1,3 @@
-import ssl, urllib.request, socket, os
-
-# Optional but helpful: short, finite network waits
-socket.setdefaulttimeout(30)
-
-# (A) Prefer using certifi if present
-try:
-    import certifi
-    cafile = certifi.where()
-    # Let stdlib urllib use an HTTPS context with that CA bundle
-    ctx = ssl.create_default_context(cafile=cafile)
-    opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx))
-    urllib.request.install_opener(opener)
-    # Also help any other consumers:
-    os.environ.setdefault("SSL_CERT_FILE", cafile)
-except Exception:
-    # Fallback: leave default context; you can still temporarily test unverified below if needed
-    pass
-
 import sys
 import os
 import json
