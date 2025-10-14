@@ -4,6 +4,7 @@ import json
 import logging
 import subprocess
 from pytubefix import YouTube, Playlist
+from pytubefix.helpers import safe_filename
 from tkinter import Tk, filedialog
 import win32com.client
 
@@ -13,7 +14,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
     """ Downloads the video and converts it to specified format. """
     try:
         yt = YouTube(video_url)
-        title = yt.title if filenamePreference else f"output_{len(os.listdir(path))}"
+        title = safe_filename(yt.title) if filenamePreference else f"output_{len(os.listdir(path))}"
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
