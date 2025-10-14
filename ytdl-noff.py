@@ -4,51 +4,34 @@ import json
 import logging
 import subprocess
 from pytubefix import YouTube, Playlist
-from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
-import requests
 import win32com.client
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-def get_complete_video_title(video_url):
-    """ Extracts and returns the complete title of the YouTube video. """
-    response = requests.get(video_url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    title_tag = soup.find("title")
-    complete_title = title_tag.text.strip()
-    if complete_title.endswith(" - YouTube"):
-        complete_title = complete_title[:-10]
-    return complete_title
-
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
-        if filenamePreference:
-            complete_title = get_complete_video_title(video_url)
-            for c in '<>:"/\\|?*':
-                complete_title = complete_title.replace(c, " ")
-        else:
-            complete_title = f"output_{len(os.listdir(path))}"
         yt = YouTube(video_url)
+        title = yt.title if filenamePreference else f"output_{len(os.listdir(path))}"
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
                 '''
                 Mp3 files downloaded with pytubefix do not include metadata such as bitrate that iTunes needs to import them.
                 '''
-                stream.download(output_path=path, filename=f"{complete_title}_audio.mp3")
-                input_path = os.path.join(path, f"{complete_title}_audio.mp3")
-                subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', input_path, '-acodec', 'mp3', os.path.join(path, f"{complete_title}.mp3")], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                downloaded_video.append(f"{complete_title}.mp3")
+                stream.download(output_path=path, filename=f"{title}_audio.mp3")
+                input_path = os.path.join(path, f"{title}_audio.mp3")
+                subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', input_path, '-acodec', 'mp3', os.path.join(path, f"{title}.mp3")], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                downloaded_video.append(f"{title}.mp3")
                 os.remove(input_path)
             else:
-                stream.download(output_path=path, filename=f"{complete_title}.mp3")
+                stream.download(output_path=path, filename=f"{title}.mp3")
                 
             if timestamps:
-                uncut_path = os.path.join(path, f"{complete_title}.mp3")
+                uncut_path = os.path.join(path, f"{title}.mp3")
                 for i, ts in enumerate(timestamps):
-                    part_filename = f"{complete_title}_part_{i+1}.mp3"
+                    part_filename = f"{title}_part_{i+1}.mp3"
                     part_path = os.path.join(path, part_filename)
                     ffmpeg_cmd = ["ffmpeg", '-y', '-nostdin']
 
@@ -67,7 +50,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                     logging.info(f"{part_filename} downloaded successfully.")
                 os.remove(uncut_path)
             else:
-                logging.info(f"{complete_title} downloaded successfully.")
+                logging.info(f"{title} downloaded successfully.")
         else:
             '''
             From what i've tested, progressive streams are rarely available at high resolutions.
@@ -83,11 +66,11 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 logging.error(f"No streams available at resolution {resolution}, available: {available_resolutions}")
                 return
             if video_stream.is_progressive:
-                video_stream.download(output_path=path, filename=f"{complete_title}.mp4")
+                video_stream.download(output_path=path, filename=f"{title}.mp4")
                 if timestamps:
-                    uncut_path = os.path.join(path, f"{complete_title}.mp4")
+                    uncut_path = os.path.join(path, f"{title}.mp4")
                     for i, ts in enumerate(timestamps):
-                        part_filename = f"{complete_title}_part_{i+1}.mp4"
+                        part_filename = f"{title}_part_{i+1}.mp4"
                         part_path = os.path.join(path, part_filename)
                         ffmpeg_cmd = ["ffmpeg", '-y', '-nostdin']
 
@@ -116,7 +99,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                     for i, ts in enumerate(timestamps):
                         video_part_path = os.path.join(path, f"video_part_{i+1}.mp4")
                         audio_part_path = os.path.join(path, f"audio_part_{i+1}.mp3")
-                        output_part_filename = f"{complete_title}_part_{i+1}.mp4"
+                        output_part_filename = f"{title}_part_{i+1}.mp4"
                         output_part_path = os.path.join(path, output_part_filename)
                         ffmpeg_cmd = ["ffmpeg", '-y', '-nostdin']
 
@@ -137,19 +120,18 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                             downloaded_video.append(output_part_filename)
                         logging.info(f"{output_part_filename} downloaded successfully.")
                 else:
-                    subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', video_path, '-i', audio_path, '-c:v', 'copy', '-c:a', 'mp3', os.path.join(path, f'{complete_title}.mp4')], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                    subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', video_path, '-i', audio_path, '-c:v', 'copy', '-c:a', 'mp3', os.path.join(path, f'{title}.mp4')], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
                     if iTunesSync:
-                        downloaded_video.append(f"{complete_title}.mp4")
-                    logging.info(f"{complete_title} downloaded successfully.")
+                        downloaded_video.append(f"{title}.mp4")
+                    logging.info(f"{title} downloaded successfully.")
                 os.remove(audio_path)
                 os.remove(video_path)
     except Exception as e:
-        logging.exception(f"Failed to download and convert {complete_title}: {e}")
+        logging.exception(f"Failed to download and convert {title}: {e}")
 
 def download_playlist(playlist_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
-        logging.info(video_url)
         download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync)
 
 def iTunesSync(path):
