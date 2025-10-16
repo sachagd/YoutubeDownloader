@@ -32,4 +32,4 @@ This repository represents the local component of the extension. It will not wor
 - By default, files are saved in the extension directory, in a folder named output.
 - The **Timestamps** box is empty by default, meaning the entire YouTube video will be downloaded.
 - The format for the timestamps is HH:MM:SS.MS (ffmpeg format). For instance, formats like 1:15 or 10 are understood as 1 minute 15 seconds and 10 seconds respectively.
-- iTunesSync allows you to automatically add songs to your itunes library.
+- iTunesSync allows you to automatically add songs to your itunes library. This options will only work on Windows and MacOS. Open Itunes before using it.

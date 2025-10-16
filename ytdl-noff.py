@@ -6,7 +6,6 @@ import subprocess
 from pytubefix import YouTube, Playlist
 from pytubefix.helpers import safe_filename
 from tkinter import Tk, filedialog
-import win32com.client
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -135,11 +134,19 @@ def download_playlist(playlist_url, path, format, resolution, timestamps, filena
     for video_url in playlist.video_urls:
         download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync)
 
-def iTunesSync(path):
+def iTunesSyncWin(path):
     iTunes = win32com.client.Dispatch("iTunes.Application")
     library = iTunes.LibraryPlaylist
     for filename in downloaded_video:
         library.AddFile(os.path.join(os.path.abspath(path), filename))
+
+def iTunesSyncMacos(path):
+    for filename in downloaded_video:
+        file_path = os.path.join(os.path.abspath(path), filename)
+        subprocess.run([
+            "osascript", "-e",
+            f'tell application "Music" to add POSIX file "{file_path}" to library playlist 1'
+        ])
 
 def select_folder():
     """Open a folder selection dialog and return the selected path."""
@@ -182,9 +189,14 @@ def main():
                     download_video(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['type'] == 'playlist':
                     download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
-                send_message({'action': "files have been downloaded successfully"})
                 if data['iTunesSync']:
-                    iTunesSync(data['path'])
+                    if sys.platform == "win32":
+                        import win32com.client
+                        iTunesSyncWin(data['path'])
+                    elif sys.platform == "darwin":
+                        iTunesSyncMacos(data['path'])
+                    elif sys.platform.startswith("linux"):
+                        logging.warning("iTunesSync is not available on linux")
             else:
                 logging.error("Some data was not received")
             break
@@ -193,6 +205,7 @@ def main():
             logging.info(f"Selected folder path: {path}")
             send_message({'path': path})
             break
+    send_message({'action': "execution ended"})
 
 if __name__ == "__main__":
     main()

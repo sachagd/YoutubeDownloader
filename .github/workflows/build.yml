@@ -2,10 +2,10 @@ name: Build YoutubeDownloader
 
 on:
   push:
-    branches: [ test ]
+    branches: [ main ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -22,19 +22,82 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pytubefix pywin32
 
-      - name: Build YoutubeDownloader (without FFmpeg)
-        run: pyinstaller --onedir --noconfirm --name "ytdl-noff" --noconsole ytdl-noff.py
+      - name: Build YoutubeDownloader (no FFmpeg)
+        run: pyinstaller --onedir --noconfirm --name "ytdl-win-noff" --noconsole ytdl-noff.py
 
       - name: Build YoutubeDownloader (with FFmpeg)
-        run: pyinstaller --onedir --noconfirm --name "ytdl-ff" --noconsole --add-data "dependencies;dependencies" ytdl-ff.py
+        run: pyinstaller --onedir --noconfirm --name "ytdl-win-ff" --noconsole --add-data "dependencies;dependencies" ytdl-ff.py
 
       - name: Zip both builds
         run: |
           cd dist
-          powershell Compress-Archive -Path ytdl-noff -DestinationPath ytdl-noff.zip
-          powershell Compress-Archive -Path ytdl-ff -DestinationPath ytdl-ff.zip
+          powershell Compress-Archive -Path ytdl-win-noff -DestinationPath ytdl-win-noff.zip
+          powershell Compress-Archive -Path ytdl-win-ff -DestinationPath ytdl-win-ff.zip
+          
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: YoutubeDownloader-Builds
+          name: YoutubeDownloader-Windows
           path: dist/*.zip
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pytubefix
+
+      - name: Build YoutubeDownloader (no FFmpeg)
+        run: pyinstaller --onedir --noconfirm --name "ytdl-ubuntu-noff" --noconsole ytdl-noff.py
+
+      - name: Compress build
+        run: |
+          cd dist
+          zip -r ytdl-ubuntu-noff.zip ytdl-ubuntu-noff
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YoutubeDownloader-Ubuntu
+          path: dist/ytdl-ubuntu-noff.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pytubefix
+
+      - name: Build YoutubeDownloader (no FFmpeg)
+        run: pyinstaller --onedir --noconfirm --name "ytdl-macos-noff" --noconsole ytdl-noff.py
+
+      - name: Compress build
+        run: |
+          cd dist
+          zip -r ytdl-macos-noff.zip ytdl-macos-noff
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YoutubeDownloader-macOS
+          path: dist/ytdl-macos-noff.zip

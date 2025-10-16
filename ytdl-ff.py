@@ -189,7 +189,6 @@ def main():
                     download_video(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['type'] == 'playlist':
                     download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
-                send_message({'action': "files have been downloaded successfully"})
                 if data['iTunesSync']:
                     iTunesSync(data['path'])
             else:
@@ -200,6 +199,7 @@ def main():
             logging.info(f"Selected folder path: {path}")
             send_message({'path': path})
             break
+    send_message({'action': "excution ended"})
 
 if __name__ == "__main__":
     main()
