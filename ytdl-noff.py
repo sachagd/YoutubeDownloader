@@ -22,7 +22,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 '''
                 stream.download(output_path=path, filename=f"{title}_audio.mp3")
                 input_path = os.path.join(path, f"{title}_audio.mp3")
-                subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', input_path, '-acodec', 'mp3', os.path.join(path, f"{title}.mp3")], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                runcommand(["ffmpeg", '-y', '-nostdin', '-i', input_path, '-acodec', 'mp3', os.path.join(path, f"{title}.mp3")])
                 downloaded_video.append(f"{title}.mp3")
                 os.remove(input_path)
             else:
@@ -42,7 +42,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                         ffmpeg_cmd += ['-to', ts['endTime']]
 
                     ffmpeg_cmd += ['-i', uncut_path, '-c:a', 'mp3', part_path]
-                    subprocess.run(ffmpeg_cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                    runcommand(ffmpeg_cmd)
 
                     if iTunesSync:
                         downloaded_video.append(part_filename)
@@ -81,7 +81,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                             ffmpeg_cmd += ['-to', ts['endTime']]
 
                         ffmpeg_cmd += ['-i', uncut_path, '-c:a', 'mp3', '-c:v', 'copy', part_path]
-                        subprocess.run(ffmpeg_cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                        runcommand(ffmpeg_cmd)
 
                         if iTunesSync:
                             downloaded_video.append(part_filename)
@@ -111,16 +111,16 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
 
                         video_ffmpeg_cmd = ffmpeg_cmd + ['-i', video_path, '-c:v', 'copy', video_part_path]
                         audio_ffmpeg_cmd = ffmpeg_cmd + ['-i', audio_path, '-c:a', 'mp3', audio_part_path]
-                        subprocess.run(video_ffmpeg_cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                        subprocess.run(audio_ffmpeg_cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                        subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', video_part_path, '-i', audio_part_path, '-c', 'copy', output_part_path], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                        runcommand(video_ffmpeg_cmd)
+                        runcommand(audio_ffmpeg_cmd)
+                        runcommand(["ffmpeg", '-y', '-nostdin', '-i', video_part_path, '-i', audio_part_path, '-c', 'copy', output_part_path])
                         os.remove(video_part_path)
                         os.remove(audio_part_path)
                         if iTunesSync:
                             downloaded_video.append(output_part_filename)
                         logging.info(f"{output_part_filename} downloaded successfully.")
                 else:
-                    subprocess.run(["ffmpeg", '-y', '-nostdin', '-i', video_path, '-i', audio_path, '-c:v', 'copy', '-c:a', 'mp3', os.path.join(path, f'{title}.mp4')], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                    runcommand(["ffmpeg", '-y', '-nostdin', '-i', video_path, '-i', audio_path, '-c:v', 'copy', '-c:a', 'mp3', os.path.join(path, f'{title}.mp4')])
                     if iTunesSync:
                         downloaded_video.append(f"{title}.mp4")
                     logging.info(f"{title} downloaded successfully.")
@@ -128,6 +128,12 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 os.remove(video_path)
     except Exception as e:
         logging.exception(f"Failed to download and convert {title}: {e}")
+
+def runcommand(command):
+    if sys.platform == "win32":
+        subprocess.run(command, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+    else:
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def download_playlist(playlist_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     playlist = Playlist(playlist_url)
@@ -146,7 +152,7 @@ def iTunesSyncMacos(path):
         subprocess.run([
             "osascript", "-e",
             f'tell application "Music" to add POSIX file "{file_path}" to library playlist 1'
-        ])
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def select_folder():
     """Open a folder selection dialog and return the selected path."""
