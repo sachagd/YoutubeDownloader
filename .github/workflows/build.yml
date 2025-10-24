@@ -71,42 +71,66 @@ jobs:
           name: YoutubeDownloader-Ubuntu
           path: dist/ytdl-ubuntu-noff.zip
 
-  build-macos:
+  build-macos-arm64:
     runs-on: macos-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Python 3.11 universal2
-        run: |
-          PYVER=3.11.9
-          PKG=python-$PYVER-macos11.pkg
-          curl -L -o $PKG https://www.python.org/ftp/python/$PYVER/$PKG
-          sudo installer -pkg $PKG -target /
-          echo "/Library/Frameworks/Python.framework/Versions/$PYVER/bin" >> $GITHUB_PATH
+      - name: Set up Python 3.11 (ARM64)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          python3.11 -m venv venv
-          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install pyinstaller pytubefix
 
-      - name: Build YoutubeDownloader (no FFmpeg)
+      - name: Build YoutubeDownloader (ARM64)
         run: |
-          source venv/bin/activate
-          pyinstaller --onedir --noconfirm --name "ytdl-macos-noff" --noconsole --target-architecture universal2 ytdl-noff.py
-          lipo -info dist/ytdl-macos-noff/ytdl-macos-noff
-          file dist/ytdl-macos-noff/ytdl-macos-noff
+          pyinstaller --onedir --noconfirm --name "ytdl-macos-arm64" --noconsole ytdl-noff.py
+          file dist/ytdl-macos-arm64/ytdl-macos-arm64
 
       - name: Compress build
         run: |
           cd dist
-          zip -r ytdl-macos-noff.zip ytdl-macos-noff
+          zip -r ytdl-macos-arm64.zip ytdl-macos-arm64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YoutubeDownloader-macOS
-          path: dist/ytdl-macos-noff.zip
+          name: YoutubeDownloader-macOS-arm64
+          path: dist/ytdl-macos-arm64.zip
+
+  build-macos-x86_64:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python 3.11 (x86_64 via Rosetta)
+        run: |
+          arch -x86_64 /usr/bin/python3 -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install pyinstaller pytubefix
+
+      - name: Build YoutubeDownloader (x86_64)
+        run: |
+          source venv/bin/activate
+          arch -x86_64 pyinstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
+          file dist/ytdl-macos-x86_64/ytdl-macos-x86_64
+
+      - name: Compress build
+        run: |
+          cd dist
+          zip -r ytdl-macos-x86_64.zip ytdl-macos-x86_64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YoutubeDownloader-macOS-x86_64
+          path: dist/ytdl-macos-x86_64.zip
