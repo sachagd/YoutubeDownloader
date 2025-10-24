@@ -105,23 +105,31 @@ jobs:
           path: dist/ytdl-macos-arm64.zip
 
   build-macos-x86_64:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Python 3.11 (x86_64 via Rosetta)
+      - name: Install Intel Python 3.11
         run: |
-          arch -x86_64 /usr/bin/python3 -m venv venv
+          PYVER=3.11.9
+          PKG=python-$PYVER-macos11.pkg
+          curl -L -o $PKG https://www.python.org/ftp/python/$PYVER/$PKG
+          sudo installer -pkg $PKG -target /
+          echo "/Library/Frameworks/Python.framework/Versions/$PYVER/bin" >> $GITHUB_PATH
+
+      - name: Set up venv for x86_64 build
+        run: |
+          /Library/Frameworks/Python.framework/Versions/3.11/bin/python3 -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install pyinstaller pytubefix
+          python -m pip install pyinstaller pytubefix
 
       - name: Build YoutubeDownloader (x86_64)
         run: |
           source venv/bin/activate
-          arch -x86_64 pyinstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
+          pyinstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
           file dist/ytdl-macos-x86_64/ytdl-macos-x86_64
 
       - name: Compress build
