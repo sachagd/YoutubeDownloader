@@ -8,7 +8,7 @@ This repository represents the local component of the extension. It will not wor
 
 1. **Download the** [local component](https://github.com/sachagd/YoutubeDownloader/releases/download/v1.2) **and unzip it. Do not execute `main.exe`.**
 
-   **Warning:** `main.exe` is flagged as a Trojan by Windows Defender because from its perspective it is a random exe that downloads content from the internet. As a result, `init.bat` runs a command to exclude its folder from Defender scans. Proceed means that you completely trust me; otherwise, download the source code to use it directly or build the project yourself.
+   **Warning:** The executable provided in the releases are flagged as a Trojan by Windows Defender because there are unsigned. As a result, `init.bat` runs a command to exclude its folder from Defender scans. Proceed means that you completely trust me; otherwise, download the source code to use it directly or build the project yourself.
 
 2. **Run `init.bat` as Administrator**  
    - Excludes the folder from Defender  

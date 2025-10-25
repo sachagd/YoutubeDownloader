@@ -129,7 +129,7 @@ jobs:
       - name: Build YoutubeDownloader (x86_64)
         run: |
           source venv/bin/activate
-          pyinstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
+          arch -x86_64 python -m PyInstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
           file dist/ytdl-macos-x86_64/ytdl-macos-x86_64
 
       - name: Compress build
