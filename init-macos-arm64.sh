@@ -5,5 +5,5 @@ mkdir -p "$HOME/Library/Application Support/Mozilla/NativeMessagingHosts"
 cp "$DIR/native-messaging.json" "$HOME/Library/Application Support/Mozilla/NativeMessagingHosts/com.sacha.youtubedownloader.json"
 echo "Native messaging host registered successfully."
 chmod +x ytdl-macos-arm64
-xattr -d com.apple.quarantine "$DIR/ytdl-macos-arm64"
-xattr -dr com.apple.quarantine "$DIR/_internal"
+xattr -d com.apple.quarantine "ytdl-macos-arm64"
+xattr -dr com.apple.quarantine "_internal"
