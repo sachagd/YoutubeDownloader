@@ -12,8 +12,11 @@ logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(a
 def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
+        logging.info("avant Youtube")
         yt = YouTube(video_url)
+        logging.info("avant yt.title")
         title = safe_filename(yt.title) if filenamePreference else f"output_{len(os.listdir(path))}"
+        logging.info("après yt.title")
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
@@ -26,7 +29,9 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 downloaded_video.append(f"{title}.mp3")
                 os.remove(input_path)
             else:
+                logging.info("avant stream.download")
                 stream.download(output_path=path, filename=f"{title}.mp3")
+                logging.info("après stream.download")
                 
             if timestamps:
                 uncut_path = os.path.join(path, f"{title}.mp3")
@@ -127,6 +132,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 os.remove(audio_path)
                 os.remove(video_path)
     except Exception as e:
+        logging.info("on est dans l'exception là fait gaffe")
         logging.exception(f"Failed to download and convert {title}: {e}")
 
 def runcommand(command):
