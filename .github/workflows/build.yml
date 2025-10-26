@@ -22,23 +22,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pytubefix pywin32
 
-      - name: Build YoutubeDownloader (no FFmpeg)
-        run: pyinstaller --onedir --noconfirm --name "ytdl-win-noff" --noconsole ytdl-noff.py
-
-      - name: Build YoutubeDownloader (with FFmpeg)
-        run: pyinstaller --onedir --noconfirm --name "ytdl-win-ff" --noconsole --add-data "dependencies;dependencies" ytdl-ff.py
-
-      - name: Zip both builds
-        run: |
-          cd dist
-          powershell Compress-Archive -Path ytdl-win-noff -DestinationPath ytdl-win-noff.zip
-          powershell Compress-Archive -Path ytdl-win-ff -DestinationPath ytdl-win-ff.zip
+      - name: Build YoutubeDownloader
+        run: pyinstaller --onedir --noconfirm --name "ytdl-win" --noconsole ytdl.py
           
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: YoutubeDownloader-Windows
-          path: dist/*.zip
+          path: dist/ytdl-win
 
   build-ubuntu:
     runs-on: ubuntu-latest
@@ -57,19 +48,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pytubefix
 
-      - name: Build YoutubeDownloader (no FFmpeg)
-        run: pyinstaller --onedir --noconfirm --name "ytdl-ubuntu-noff" --noconsole ytdl-noff.py
-
-      - name: Compress build
-        run: |
-          cd dist
-          zip -r ytdl-ubuntu-noff.zip ytdl-ubuntu-noff
+      - name: Build YoutubeDownloader
+        run: pyinstaller --onedir --noconfirm --name "ytdl-ubuntu" --noconsole ytdl.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: YoutubeDownloader-Ubuntu
-          path: dist/ytdl-ubuntu-noff.zip
+          path: dist/ytdl-ubuntu
 
   build-macos-arm64:
     runs-on: macos-latest
@@ -90,19 +76,14 @@ jobs:
 
       - name: Build YoutubeDownloader (ARM64)
         run: |
-          pyinstaller --onedir --noconfirm --name "ytdl-macos-arm64" --noconsole ytdl-noff.py
+          pyinstaller --onedir --noconfirm --name "ytdl-macos-arm64" --noconsole ytdl.py
           file dist/ytdl-macos-arm64/ytdl-macos-arm64
-
-      - name: Compress build
-        run: |
-          cd dist
-          zip -r ytdl-macos-arm64.zip ytdl-macos-arm64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: YoutubeDownloader-macOS-arm64
-          path: dist/ytdl-macos-arm64.zip
+          path: dist/ytdl-macos-arm64
 
   build-macos-x86_64:
     runs-on: macos-14
@@ -129,16 +110,11 @@ jobs:
       - name: Build YoutubeDownloader (x86_64)
         run: |
           source venv/bin/activate
-          arch -x86_64 python -m PyInstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl-noff.py
+          arch -x86_64 python -m PyInstaller --onedir --noconfirm --name "ytdl-macos-x86_64" --noconsole ytdl.py
           file dist/ytdl-macos-x86_64/ytdl-macos-x86_64
-
-      - name: Compress build
-        run: |
-          cd dist
-          zip -r ytdl-macos-x86_64.zip ytdl-macos-x86_64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: YoutubeDownloader-macOS-x86_64
-          path: dist/ytdl-macos-x86_64.zip
+          path: dist/ytdl-macos-x86_64
