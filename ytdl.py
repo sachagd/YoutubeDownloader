@@ -2,24 +2,24 @@ import sys
 import os
 import logging
 
+logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+
 if sys.platform == "darwin":
     import certifi
-    import shutil
     os.environ["SSL_CERT_FILE"] = certifi.where()
-    ffmpeg_path = shutil.which("ffmpeg")
-    if ffmpeg_path:
-        ffmpeg_dir = os.path.dirname(ffmpeg_path)
-        os.environ["PATH"] += os.pathsep + ffmpeg_dir
+
+    for path in ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"]:
+        if os.path.exists(path):
+            os.environ["PATH"] += os.pathsep + os.path.dirname(path)
+            break
     else:
-        logging.error("FFmpeg not found. Please install it via Homebrew (brew install ffmpeg) or ensure it's in PATH.")
+        logging.error("FFmpeg not found. Please install it via Homebrew (brew install ffmpeg).")
 
 import json
 import subprocess
 from pytubefix import YouTube, Playlist
 from pytubefix.helpers import safe_filename
 from tkinter import Tk, filedialog
-
-logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def download_video(video_url, path, format, resolution, timestamps, filename_preference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
