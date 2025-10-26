@@ -5,8 +5,9 @@ document.querySelectorAll('input[name="format"]').forEach(radio => {
         const settings = {format};
         if (format === 'mp4') {
             resolution.disabled = false;
-            document.getElementById('itunes-sync').checked = false;
             settings.resolution = resolution.value;
+            document.getElementById('itunes-sync').checked = false;
+            settings.iTunesSync = false
         } else {
             resolution.disabled = true;
             settings.resolution = null;
@@ -56,12 +57,14 @@ document.getElementById('standard-path-button').addEventListener('click', () => 
 
 document.getElementById('itunes-sync').addEventListener('change', () => {
     const isChecked = document.getElementById('itunes-sync').checked;
-    browser.storage.local.set({ iTunesSync: isChecked });
+    const settings = {iTunesSync: isChecked}
     if (isChecked) {
         document.getElementById('format-mp3').checked = true;
+        settings.format = 'mp3'
         document.getElementById('resolution').disabled = true;
     }
-});
+    browser.storage.local.set(settings);
+}); 
 
 document.getElementById('itunes-path-button').addEventListener('click', () => {
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', {action: 'select_folder'}, response => {
