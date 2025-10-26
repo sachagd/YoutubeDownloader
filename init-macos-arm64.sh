@@ -7,4 +7,3 @@ echo "Native messaging host registered successfully."
 chmod +x ytdl-macos-arm64
 xattr -d com.apple.quarantine "$DIR/ytdl-macos-arm64"
 xattr -dr com.apple.quarantine "$DIR/_internal"
-rm -- "$0"

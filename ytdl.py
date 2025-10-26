@@ -1,5 +1,10 @@
 import sys
 import os
+
+if sys.platform == "darwin":
+    import certifi
+    os.environ["SSL_CERT_FILE"] = certifi.where()
+
 import json
 import logging
 import subprocess
