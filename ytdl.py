@@ -132,8 +132,7 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
                 os.remove(audio_path)
                 os.remove(video_path)
     except Exception as e:
-        logging.info("on est dans l'exception là fait gaffe")
-        logging.exception(f"Failed to download and convert {title}: {e}")
+        logging.exception(f"Failed to download and convert {video_url}: {e}")
 
 def runcommand(command):
     if sys.platform == "win32":
