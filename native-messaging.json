@@ -1,7 +1,7 @@
 {
   "name": "com.sacha.youtubedownloader",
   "description": "Handles video downloading and conversion tasks for the YouTube Downloader extension",
-  "path": "main.exe",
+  "path": "APP_PATH",
   "type": "stdio",
   "allowed_extensions": ["{effa17e0-0dba-4d56-8a9c-276b198dd884}"]
 }
