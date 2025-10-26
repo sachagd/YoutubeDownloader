@@ -1,12 +1,19 @@
 import sys
 import os
+import logging
 
 if sys.platform == "darwin":
     import certifi
+    import shutil
     os.environ["SSL_CERT_FILE"] = certifi.where()
+    ffmpeg_path = shutil.which("ffmpeg")
+    if ffmpeg_path:
+        ffmpeg_dir = os.path.dirname(ffmpeg_path)
+        os.environ["PATH"] += os.pathsep + ffmpeg_dir
+    else:
+        logging.error("FFmpeg not found. Please install it via Homebrew (brew install ffmpeg) or ensure it's in PATH.")
 
 import json
-import logging
 import subprocess
 from pytubefix import YouTube, Playlist
 from pytubefix.helpers import safe_filename
