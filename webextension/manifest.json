@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "YouTube Downloader",
-    "version": "1.1",
+    "version": "1.2",
     "description": "Download YouTube video in mp3 or mp4 files directly via Firefox.",
     "icons": {
         "48": "icon.png"
