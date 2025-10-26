@@ -1,25 +1,23 @@
 document.querySelectorAll('input[name="format"]').forEach(radio => {
     radio.addEventListener('change', () => {
-        const selectedFormat = radio.value;
-        const resolutionSelect = document.getElementById('resolution-select');
-        const settingsToSave = {downloadFormat: selectedFormat};
-
-        if (selectedFormat === 'mp4') {
-            resolutionSelect.disabled = false;
-            document.getElementById('iTunesSync').checked = false;
-            settingsToSave.downloadResolution = resolutionSelect.value;
+        const format = radio.value;
+        const resolution = document.getElementById('resolution');
+        const settings = {format};
+        if (format === 'mp4') {
+            resolution.disabled = false;
+            document.getElementById('itunes-sync').checked = false;
+            settings.resolution = resolution.value;
         } else {
-            resolutionSelect.disabled = true;
-            settingsToSave.downloadResolution = null;
+            resolution.disabled = true;
+            settings.resolution = null;
         }
-
-        browser.storage.local.set(settingsToSave);
+        browser.storage.local.set(settings);
     });
 });
 
-document.getElementById('resolution-select').addEventListener('change', () => {
-    const selectedResolution = document.getElementById('resolution-select').value;
-    browser.storage.local.set({downloadResolution: selectedResolution});
+document.getElementById('resolution').addEventListener('change', () => {
+    const resolution = document.getElementById('resolution').value;
+    browser.storage.local.set({resolution});
 });
 
 document.getElementById('timestamps').addEventListener('input', () => {
@@ -29,10 +27,10 @@ document.getElementById('timestamps').addEventListener('input', () => {
         const [startTime, endTime] = line.split('-').map(str => str.trim());
         return { startTime, endTime };
     });
-    browser.storage.local.set({timestamps: timestamps});
+    browser.storage.local.set({timestamps});
 });
 
-document.querySelectorAll('input[name="filenamePreference"]').forEach(radio => {
+document.querySelectorAll('input[name="filename-preference"]').forEach(radio => {
     radio.addEventListener('change', () => {
         if(radio.value === 'title'){
             browser.storage.local.set({filenamePreference: true}); 
@@ -43,37 +41,76 @@ document.querySelectorAll('input[name="filenamePreference"]').forEach(radio => {
     });
 });
 
-document.getElementById('selectFolderButtonStandard').addEventListener('click', () => {
+document.getElementById('standard-path-button').addEventListener('click', () => {
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', {action: 'select_folder'}, response => {
         if (browser.runtime.lastError) {
             alert('Failed to connect to the native application. Please ensure it is installed and configured correctly.');
         } else {
             if (response.path !== ""){
-                document.getElementById('selectedFolderPathStandard').textContent = 'Selected folder: ' + response.path;
-                browser.storage.local.set({downloadPathStandard: response.path});
+                document.getElementById('standard-path-text').textContent = 'Selected folder: ' + response.path;
+                browser.storage.local.set({standardPath: response.path});
             }
         }
     });
 });
 
-document.getElementById('iTunesSync').addEventListener('change', () => {
-    const isChecked = document.getElementById('iTunesSync').checked;
+document.getElementById('itunes-sync').addEventListener('change', () => {
+    const isChecked = document.getElementById('itunes-sync').checked;
     browser.storage.local.set({ iTunesSync: isChecked });
     if (isChecked) {
         document.getElementById('format-mp3').checked = true;
-        document.getElementById('resolution-select').disabled = true;
+        document.getElementById('resolution').disabled = true;
     }
 });
 
-document.getElementById('selectFolderButtoniTunesSync').addEventListener('click', () => {
+document.getElementById('itunes-path-button').addEventListener('click', () => {
     browser.runtime.sendNativeMessage('com.sacha.youtubedownloader', {action: 'select_folder'}, response => {
         if (browser.runtime.lastError) {
             alert('Failed to connect to the native application. Please ensure it is installed and configured correctly.');
         } else {
             if (response.path !== ""){
-            document.getElementById('selectedFolderPathiTunesSync').textContent = 'Selected folder: ' + response.path;
-            browser.storage.local.set({downloadPathiTunesSync: response.path});
+            document.getElementById('itunes-path-text').textContent = 'Selected folder: ' + response.path;
+            browser.storage.local.set({iTunesPath: response.path});
             }
         }
     });
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const settings = await browser.storage.local.get();
+
+    if (settings.format) {
+        document.getElementById(`format-${settings.format}`).checked = true;
+        const resolution = document.getElementById('resolution');
+        resolution.disabled = settings.format !== 'mp4';
+    }
+
+    if (settings.resolution) {
+        document.getElementById('resolution').value = settings.resolution;
+    }
+
+    if (Array.isArray(settings.timestamps)) {
+        const text = settings.timestamps.map(t => `${t.startTime} - ${t.endTime}`).join('\n');
+        document.getElementById('timestamps').value = text;
+    }
+
+    if (settings.filenamePreference === false) {
+        document.getElementById('filename-output').checked = true;
+    } else {
+        document.getElementById('filename-title').checked = true;
+    }
+
+    if (settings.standardPath) {
+        document.getElementById('standard-path-text').textContent = 'Selected folder: ' + settings.standardPath;
+    }
+
+    if (settings.iTunesSync) {
+        document.getElementById('itunes-sync').checked = true;
+        document.getElementById('format-mp3').checked = true;
+        document.getElementById('resolution').disabled = true;
+    }
+
+    if (settings.iTunesPath) {
+        document.getElementById('itunes-path-text').textContent = 'Selected folder: ' + settings.iTunesPath;
+    }
 });

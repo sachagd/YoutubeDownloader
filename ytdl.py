@@ -9,13 +9,13 @@ from tkinter import Tk, filedialog
 
 logging.basicConfig(filename='youtube_urls.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-def download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
+def download_video(video_url, path, format, resolution, timestamps, filename_preference, iTunesSync):
     """ Downloads the video and converts it to specified format. """
     try:
         logging.info("avant Youtube")
         yt = YouTube(video_url)
         logging.info("avant yt.title")
-        title = safe_filename(yt.title) if filenamePreference else f"output_{len(os.listdir(path))}"
+        title = safe_filename(yt.title) if filename_preference else f"output_{len(os.listdir(path))}"
         logging.info("après yt.title")
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
@@ -63,7 +63,10 @@ def download_video(video_url, path, format, resolution, timestamps, filenamePref
             '''
             video_stream = yt.streams.filter(res=resolution).first()
             if not video_stream:
-                available_resolutions = sorted({s.resolution for s in yt.streams.filter(file_extension='mp4') if s.resolution})
+                available_resolutions = sorted(
+                    {s.resolution for s in yt.streams.filter(file_extension='mp4') if s.resolution},
+                    key=lambda r: int(r.replace('p', ''))
+                )
                 send_message({
                     'error': f"No streams available at resolution {resolution}",
                     'availableResolutions': available_resolutions
@@ -140,12 +143,13 @@ def runcommand(command):
     else:
         subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-def download_playlist(playlist_url, path, format, resolution, timestamps, filenamePreference, iTunesSync):
+def download_playlist(playlist_url, path, format, resolution, timestamps, filename_preference, iTunesSync):
     playlist = Playlist(playlist_url)
     for video_url in playlist.video_urls:
-        download_video(video_url, path, format, resolution, timestamps, filenamePreference, iTunesSync)
+        download_video(video_url, path, format, resolution, timestamps, filename_preference, iTunesSync)
 
 def iTunesSyncWin(path):
+    import win32com.client
     iTunes = win32com.client.Dispatch("iTunes.Application")
     library = iTunes.LibraryPlaylist
     for filename in downloaded_video:
@@ -202,7 +206,6 @@ def main():
                     download_playlist(data['url'], data['path'], data['format'], data['resolution'], data['timestamps'], data['filenamePreference'], data['iTunesSync'])
                 if data['iTunesSync']:
                     if sys.platform == "win32":
-                        import win32com.client
                         iTunesSyncWin(data['path'])
                     elif sys.platform == "darwin":
                         iTunesSyncMacos(data['path'])

@@ -24,7 +24,7 @@
 
             <fieldset>
                 <legend>Select resolution:</legend>
-                <select id="resolution-select" disabled>
+                <select id="resolution" disabled>
                     <option value="144p">144p</option>
                     <option value="240p">240p</option>
                     <option value="360p">360p</option>
@@ -47,28 +47,28 @@ HH:MM:SS - HH:MM:SS
             <fieldset>
                 <legend>Filename preference:</legend>
                 <div>
-                    <input type="radio" id="filename-title" name="filenamePreference" value="title" checked>
+                    <input type="radio" id="filename-title" name="filename-preference" value="title" checked>
                     <label for="filename-title">Use YouTube Video Title</label>
                 </div>
                 <div>
-                    <input type="radio" id="filename-output" name="filenamePreference" value="output">
+                    <input type="radio" id="filename-output" name="filename-preference" value="output">
                     <label for="filename-output">Use generic 'output' name</label>
                 </div>
             </fieldset>
 
             <div style="text-align:center">
-                <button type="button" id="selectFolderButtonStandard">Select Download Folder</button>
-                <p id="selectedFolderPathStandard">No folder selected</p>
+                <button type="button" id="standard-path-button">Select Download Folder</button>
+                <p id="standard-path-text">No folder selected</p>
             </div>
 
             <fieldset>
                 <legend>iTunesSync</legend>
-                <input type="checkbox" id="iTunesSync">
-                <label for="iTunesSync" >Enabled</label>
+                <input type="checkbox" id="itunes-sync">
+                <label for="itunes-sync" >Enabled</label>
 
                 <div style="text-align:center">
-                    <button type="button" id="selectFolderButtoniTunesSync">Select Download Folder</button>
-                    <p id="selectedFolderPathiTunesSync">No folder selected</p>
+                    <button type="button" id="itunes-path-button">Select Download Folder</button>
+                    <p id="itunes-path-text">No folder selected</p>
                 </div>
             </fieldset>
         </form>
