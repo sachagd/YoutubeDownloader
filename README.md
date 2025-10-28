@@ -50,18 +50,18 @@ This repository represents the local component of the extension. It will not wor
    ```
 ---
 
+## Accessing Extension Settings
+
+1. Open a new tab and search `about:addons`.  
+2. Find **YouTubeDownloader** in the list.  
+3. Click **Options** (or **Preferences**) to change the settings.
+
+Settings are persistent between download so you don't need to set them each time
 
 ## How to Use the Extension
 
 1. Navigate to the YouTube video or playlist you want to download.  
-2. Click the extension icon in the Firefox toolbar.  
-3. Select your options and start the download.
-
-## Accessing Extension Settings
-
-1. Open a new tab and go to `about:addons`.  
-2. Find **YouTubeDownloader** in the list.  
-3. Click **Options or Preferences** to change the settings.
+2. Click the extension icon in the Firefox toolbar to start the download.  
 
 ## Additional Information
 - By default, files are saved in the extension directory, in a folder named output.
