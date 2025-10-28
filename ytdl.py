@@ -26,9 +26,7 @@ def download_video(video_url, path, format, resolution, timestamps, filename_pre
     try:
         logging.info("avant Youtube")
         yt = YouTube(video_url)
-        logging.info("avant yt.title")
         title = safe_filename(yt.title) if filename_preference else f"output_{len(os.listdir(path))}"
-        logging.info("après yt.title")
         if format == 'mp3':
             stream = yt.streams.get_audio_only()
             if iTunesSync and not timestamps:
@@ -41,9 +39,7 @@ def download_video(video_url, path, format, resolution, timestamps, filename_pre
                 downloaded_video.append(f"{title}.mp3")
                 os.remove(input_path)
             else:
-                logging.info("avant stream.download")
                 stream.download(output_path=path, filename=f"{title}.mp3")
-                logging.info("après stream.download")
                 
             if timestamps:
                 uncut_path = os.path.join(path, f"{title}.mp3")
